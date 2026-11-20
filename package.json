@@ -1,12 +1,12 @@
 {
-  "name": "@memorysmithapp/template",
-  "version": "0.5.1",
+  "name": "@memorysmithapp/site",
+  "version": "0.1.0",
   "private": true,
-  "description": "The starting point of every repository of the memorysmithapp organisation: the documents humans and agents work by.",
+  "description": "The showcase of MemorySmith: the website served at www.memorysmith.app.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/memorysmithapp/memorysmithapp-template.git"
+    "url": "git+https://github.com/memorysmithapp/memorysmithapp-site.git"
   },
   "scripts": {
     "quality": "node scripts/quality.mjs",
