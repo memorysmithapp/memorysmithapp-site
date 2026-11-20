@@ -1,0 +1,60 @@
+# Tags and publishes a version once its bump is merged, so that nobody tags by hand, and closes
+# its milestone (scripts/release.mjs decides; scripts/close-milestone.mjs closes; SDLC.md §10
+# describes the flow). Uses only the workflow's GITHUB_TOKEN, and no stored secret.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  # Changing a milestone needs it.
+  issues: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          # No dependency to cache, and the release needs no package manager.
+          package-manager-cache: false
+      - name: Decide
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs "$RUNNER_TEMP/notes.md" >> "$GITHUB_OUTPUT"
+      - name: Write the annotated tag on the merged commit
+        if: steps.plan.outputs.action == 'release'
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag --annotate --cleanup=verbatim "$TAG" --message "$TAG" --message "$(cat "$RUNNER_TEMP/notes.md")" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+      # Also when the tag is in place and the Release is missing, as after a run that failed between them.
+      - name: Create the GitHub Release
+        if: steps.plan.outputs.action == 'release' || steps.plan.outputs.action == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+      # Also on a run started again on the tagged commit, so that it finishes a run that failed here.
+      - name: Close the milestone of the version
+        if: steps.plan.outputs.action == 'release' || steps.plan.outputs.action == 'publish' || steps.plan.outputs.action == 'tagged'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: node scripts/close-milestone.mjs "$TAG"

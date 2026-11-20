@@ -1,0 +1,218 @@
+# Architecture
+
+How `memorysmithapp-template` is organised, and why. It describes this repository itself: what it is made of, what enforces each invariant of [`AGENTS.md` §5](../AGENTS.md#5-invariants), what it integrates with, and the decisions behind it.
+
+*Rewritten on adoption*, except [§6](#6-architecture-decision-records), whose format is kept and whose records start empty. A repository created from this one keeps every heading below with the one-line instruction in italics under it, and replaces the content with its own.
+
+Claims carry their status when it is not obvious: *observed*, *declared*, *inferred*, and **To confirm** for what was not verified ([`PRD.md`](PRD.md), RN-DOC-006).
+
+## 1. Overview
+
+*Instruction: what the system is made of, and how the parts relate.*
+
+The repository carries no product code. It is made of:
+
+- **Documents**, the core of what it delivers: `.claude/CLAUDE.md` imports `AGENTS.md`; `AGENTS.md` maps the reading and the writing onto `PRD.md`, `ARCHITECTURE.md` and `SDLC.md`, which live in `docs/`, and `README.md`, and states the limits and invariants in one line each; `CHANGELOG.md` records what each version changed. The root holds only what a tool or a convention looks for there ([ADR-009](#adr-009-the-root-holds-only-what-a-tool-looks-for-there)).
+- **Repository files:** `package.json`, the one home of the version; `.gitignore`, `.editorconfig` and `LICENSE`.
+- **A setup script**, `scripts/setup-repo.sh`, which applies to a repository the GitHub configuration a copy does not carry, and puts it back when it drifts.
+- **A quality workflow**, `.github/workflows/quality.yml`, which runs `scripts/quality.mjs` on every pull request and push to `main`; the ruleset requires it.
+- **A release workflow**, `.github/workflows/release.yml`, which tags and publishes a version once its bump is merged, and closes its milestone.
+- **GitHub configuration**: the ruleset `main`, the branch protection of `main`, the team `maintainers`'s write, and the settings the script applies.
+
+Each fact has one home ([`PRD.md` RN-DOC-004](PRD.md#7-features-and-rules)): an invariant is stated in `AGENTS.md` and its mechanism here; a rule is stated in `PRD.md` and enforced where §3 says.
+
+## 2. Layout
+
+*Instruction: every file and directory, and what it is for.*
+
+| Path | What it is for |
+|---|---|
+| `.claude/CLAUDE.md` | The single line `@../AGENTS.md`, which Claude Code imports at the start of every session and sub-agent |
+| `AGENTS.md` | How an agent works here: identity, reading and writing maps, limits, invariants, verified commands, the checklist before done, adoption; at the root, where the agents that read it look for it |
+| `docs/PRD.md` | What the product solves and delivers, under which rule |
+| `docs/ARCHITECTURE.md` | This document |
+| `docs/SDLC.md` | How a change travels from an issue to a release |
+| `README.md` | What this is and how to start; at the root, where GitHub renders it |
+| `CHANGELOG.md` | What changed in each version, in Keep a Changelog 1.1.0; at the root, by Keep a Changelog's convention and because the scripts read it there |
+| `package.json` | The one home of the version (`version`), the package manager pinned (`packageManager`), and the scripts `quality` and `test`; private, named `@memorysmithapp/template`, with no dependency |
+| `scripts/setup-repo.sh` | Applies the settings a copy does not carry to a created repository (RN-REP-001, RN-REP-002); uses only `gh` and `jq`; the mechanism of INV-03 |
+| `scripts/quality.mjs` | The checks of the workflow *Quality*, Node only (RN-REP-003) |
+| `scripts/quality.test.mjs` | The tests of the checks, one deliberate violation each, on `node:test` |
+| `scripts/release.mjs` | Decides what the workflow *Release* does on a push to `main`: release, nothing, or fail (RN-VER-003) |
+| `scripts/release.test.mjs` | The tests of that decision |
+| `scripts/close-milestone.mjs` | Closes the milestone of a version the workflow *Release* released, or leaves it open and names what it still holds (RN-VER-005) |
+| `scripts/close-milestone.test.mjs` | The tests of what it does to a milestone |
+| `scripts/lib/changelog.mjs` | Reads `CHANGELOG.md`: its sections, categories, link definitions and the notes of a version |
+| `.github/workflows/quality.yml` | The workflow *Quality*, job `Quality` |
+| `.github/workflows/release.yml` | The workflow *Release*, which writes the tag and the GitHub Release of a merged version and closes its milestone |
+| `pnpm-lock.yaml` | Written by pnpm; with no dependency, it records only the pinned pnpm |
+| `.gitignore` | Dependencies, build output, coverage, environment files, logs, operating-system and editor files, and Claude Code's personal settings and worktrees under `.claude/` |
+| `.editorconfig` | UTF-8, LF, two spaces, final newline |
+| `LICENSE` | The MIT licence; at the root, the only place GitHub detects it |
+
+## 3. Invariants and their mechanisms
+
+*Instruction: one subsection per invariant of `AGENTS.md` §5, saying what enforces it, or that nothing does.*
+
+### INV-01 The version has one home
+
+The version lives in the `version` field of the root `package.json` and nowhere else; `CHANGELOG.md` records the versions that were cut (RN-VER-001, RN-VER-002).
+
+**Mechanism:** check 1 of [`scripts/quality.mjs`](../scripts/quality.mjs), run by the workflow *Quality*: the root `package.json` has a SemVer `version`, and it is the latest released section of `CHANGELOG.md`; on the branch `release/vX.Y.Z` it may be ahead of it, bumping to it; before the first cut it may be `0.1.0` with no released section. That the version is written in no other file is held by the writing map and the owner's review.
+
+### INV-02 CLAUDE.md is only the import
+
+`.claude/CLAUDE.md` is the line `@../AGENTS.md` and nothing else, and no `CLAUDE.md` sits at the root (RN-DOC-008). Claude Code expands an `@path` line into the contents of the file it names, so the instructions load in every session and sub-agent; a `CLAUDE.md` that only mentioned `AGENTS.md` in prose would leave reading it to the agent's judgement (*observed* in a fresh session, #2). The path resolves from the file that holds the import: inside `.claude/`, `@AGENTS.md` imports nothing, and the session starts with the file listed as loaded and the instructions absent, with no warning (*observed* in fresh sessions, #24). A `CLAUDE.md` at the root would load as well, beside the one in `.claude/`.
+
+**Mechanism:** check 3 of [`scripts/quality.mjs`](../scripts/quality.mjs), run by the workflow *Quality*: `.claude/CLAUDE.md` is byte for byte `@../AGENTS.md` and an optional newline, and no `CLAUDE.md` exists at the root. The check walks no worktree under `.claude/worktrees/`, each a full copy of the repository.
+
+### INV-03 main changes only through a pull request
+
+**Mechanism:** two settings of the repository, the ruleset saying *how* a change reaches `main` and the branch protection saying *who* merges it (RN-REP-004, [ADR-010](#adr-010-who-merges-to-main-is-the-branch-protections)).
+
+The repository ruleset `main` (*observed*, id `24923714`), active on the default branch, with no bypass actors:
+
+- `deletion`: the branch cannot be deleted;
+- `non_fast_forward`: no force push;
+- `pull_request`: every change through a pull request, with 0 required approvals and no code owner review, merge, squash and rebase allowed;
+- `required_status_checks`: the check `Quality` passes before a merge.
+
+Nobody can bypass it, administrators included (`current_user_can_bypass: never`, *observed*).
+
+The branch protection of `main` (*observed* on 2026-11-16, #39) restricts who can push to it to the organization's team `maintainers`, which has write on the repository; GitHub applies that restriction to merging a pull request too, so the merge of anyone outside the team is refused. `enforce_admins` is on, force pushes and deletion are off, and it requires no review and no status check of its own: those are the ruleset's. For a member of the team a merge is a permission, not a bypass, so a maintainer's own pull request merges with a green button. The team `contributors` keeps write, and with it branches, pull requests and merges into a `release/vX.Y.Z`. The restriction of a branch protection is available on GitHub's free plan for a public repository of an organization (*observed* on this one).
+
+Both are settings of the repository, not files, so a created repository does not receive them: **`scripts/setup-repo.sh`** creates them there, or brings them back to this definition when they drifted (RN-REP-001). The script defines them in its own source and compares only what it sets: the ruleset rule by rule, so a parameter GitHub fills in by default does not count as drift, and the branch protection in the shape of its request, the users, teams and apps of the restriction by name. Run against a throwaway repository, the ruleset it created was identical to this repository's, identifiers and timestamps aside, and a second run changed nothing (*observed*, #7). Run against this repository, it found the ruleset, the team's write and the branch protection already in place and changed nothing (*observed* on 2026-11-16, #39).
+
+The adoption keeps the script, so every created repository holds the definition of its ruleset and the means to put it back (#17).
+
+### INV-04 Only the release workflow writes a tag
+
+A version names one commit: the tag `vX.Y.Z` is written once, on the merged commit, and never moved or deleted ([`SDLC.md` §10](SDLC.md#10-release), [§11](SDLC.md#11-rollback)).
+
+**Mechanism:** the workflow *Release* ([`.github/workflows/release.yml`](../.github/workflows/release.yml)), on every push to `main`. [`scripts/release.mjs`](../scripts/release.mjs) reads the version, releases nothing when the GitHub links at the foot of `CHANGELOG.md` do not all name `GITHUB_REPOSITORY` (RN-VER-004), releases nothing when its tag names an ancestor of `HEAD` (`git merge-base --is-ancestor`, on the full history the checkout fetches), refuses to go on when the tag names any other commit, creates only the GitHub Release when the tag names `HEAD` and the Release is missing (read with `gh api`, where any answer but found or 404 fails the run), and releases only when `CHANGELOG.md` has a section for it and the tag does not exist yet; the workflow then writes the annotated tag on `GITHUB_SHA` and the Release with that section as its notes (RN-VER-003). That nobody writes a tag by hand is held by the limit of `AGENTS.md` §4: the ruleset `main` protects the branch, not tags.
+
+The link condition exists because a repository created from this one receives its `CHANGELOG.md`, `[0.1.0]` section included, in an initial commit pushed to `main`: without it, *Release* published this repository's `v0.1.0` there on creation (*observed*, #14). Check 6 of [`scripts/quality.mjs`](../scripts/quality.mjs) holds the other side: the foot links name the repository the check runs in, so an adoption that forgets to rewrite them fails `Quality` on its pull request instead of leaving *Release* to skip in silence. Until the adoption, a created repository's `Quality` therefore fails on that check, and says to rewrite the links.
+
+### INV-05 The documents keep their form
+
+`CHANGELOG.md` keeps the format of Keep a Changelog 1.1.0, every relative link and anchor resolves, and no document carries a version footer (RN-VER-002, RN-DOC-005, RN-REP-003).
+
+**Mechanism:** checks 2, 4 and 5 of [`scripts/quality.mjs`](../scripts/quality.mjs), run by the workflow *Quality*. Anchors are computed as GitHub computes them (lowercase, punctuation dropped, spaces as hyphens, `-1`, `-2`… for repeated headings), which is what keeps the links of `AGENTS.md` into this document from rotting silently. Code blocks and inline code are skipped, so a link or a footer quoted as code is not read as one. A footer is a line *starting* with "Last revised", "Last updated", "Revision date", "Internal document" and the like; the words inside a sentence are not one.
+
+## 4. Integrations
+
+*Instruction: every external system the project depends on, and what it uses from each.*
+
+**GitHub.**
+
+- *Template repositories:* a repository is created from this one with *Use this template* or `gh repo create --template`, receiving a copy of the files of the default branch in one initial commit, with no link back and no settings ([ADR-004](#adr-004-a-github-template-repository-copied-once)). What makes this repository offer them is GitHub's *Template repository* flag, which the owner sets with `gh repo edit --template` (*declared*).
+- *Rulesets, branch protection and settings:* the ruleset `main` and the branch protection of `main` of [INV-03](#inv-03-main-changes-only-through-a-pull-request), the write of the organization's team `maintainers` on the repository, and the description, topics, merge options, wiki and discussions, all through the REST API by `scripts/setup-repo.sh` with the `gh` of an administrator.
+- *Teams:* the organization's teams `maintainers` (who merges to `main`, today the owner alone) and `contributors` (branches, issues and pull requests), each with write on its repositories (*declared* by the owner in #39). The script requires `maintainers` to exist and gives it write; it does not create teams or change their members.
+- *Issues and milestones:* GitHub's blank issue, its default labels and the product label families a repository declares in [`SDLC.md` §2](SDLC.md#2-issues-and-milestones); a milestone per version ([ADR-008](#adr-008-githubs-default-labels-are-a-floor)), closed by the workflow *Release* once the version is released (RN-VER-005).
+- *Actions:* the workflows *Quality* and *Release* on `ubuntu-latest`, with Node 24 from `actions/setup-node` and the pnpm of `packageManager` through Corepack. Nothing they run installs a system package, so the label is left to follow GitHub's images: when it moved to Ubuntu 26.04 (actions/runner-images#14748), every step of *Quality*, and *Release*'s decision (`action=skip` on a push after a tag) and annotated tag, ran green on `ubuntu-26.04` (*observed* on 2026-10-18, #27), and at the release of v0.4.0 *Release* pushed the tag and created the GitHub Release on Ubuntu 26.04.1 LTS, image `20261103.629` (*observed* in run 43926176624, #34).
+
+**npm.** Any package a repository of the organisation publishes uses the scope `@memorysmithapp` ([ADR-006](#adr-006-the-npm-scope-memorysmithapp)). The npm organisation `memorysmithapp` exists since 2026-10-12, which reserves the scope, and is on the **free plan, which publishes public packages only**; a private package would need the paid Teams plan (*declared* by the owner in #1). No npm token exists (*declared*). Therefore, in the `package.json` of every repository of the organisation:
+
+- **A package published under `@memorysmithapp` declares `"publishConfig": { "access": "public" }`.** npm publishes a scoped package as *restricted* by default, and on the free plan that publish fails with `402 Payment Required`; written in `package.json`, the access does not depend on somebody remembering `--access public`.
+- **A package never meant to be published declares `"private": true`**, which stops `npm publish` whatever the plan. The root `package.json` of this repository is one: this repository publishes nothing.
+- **Publishing from CI goes through npm *trusted publishing* from GitHub Actions (OIDC)**, with no stored token, set up by the repository that first publishes, in an issue of its own.
+
+## 5. Operation
+
+*Instruction: what runs, where, with which permissions and secrets.*
+
+**Quality** (`.github/workflows/quality.yml`) runs on every pull request and every push to `main`, with `contents: read` and no secret; it reads the branch from `GITHUB_HEAD_REF` or `GITHUB_REF_NAME` for check 1.
+
+**Release** (`.github/workflows/release.yml`) runs on every push to `main`, reads the repository it runs in from `GITHUB_REPOSITORY`, one run at a time (`concurrency: release`), with `contents: write` and `issues: write` for the workflow's own `GITHUB_TOKEN` and no stored secret: it pushes the tag with git, as `github-actions[bot]`, reads whether a Release exists and creates it with `gh`, and closes the milestone through the REST API with `gh` in `scripts/close-milestone.mjs`, which GitHub allows only with `issues: write`. That step runs when the decision is `release` or `tagged`, writes what it did to the run summary, and fails only when GitHub cannot be read or written. A tag pushed with that token starts no other workflow.
+
+There is no deployable. `scripts/setup-repo.sh` runs on a person's machine, once when a repository is created and again whenever its settings drift, with the permissions of the administrator whose `gh` it uses; it needs no token of its own. It refuses a repository not owned by an organization, an organization without the team `maintainers`, and a repository whose default branch has no commit yet, since a branch protection names an existing branch.
+
+## 6. Architecture decision records
+
+*Instruction: the decisions behind the architecture, one record each, in the format below.*
+
+*Kept on adoption: the format below stays, and a created repository starts with no record.*
+
+Each record has an identifier, never reused; its context, decision, rationale and consequences; its date, status and **origin**. A decision that changes keeps its old record, marked *Superseded by ADR-NNN*, and a new record states the new decision.
+
+The records ADR-001 to ADR-007 are **reconstructed**: the decisions were taken by the owner of the organisation before this repository existed, declared in #1 on 2026-10-12, and written here as records by the session that built v0.1.0.
+
+### ADR-001 A small set of documents instead of a large CLAUDE.md
+
+- **Context:** the main repository keeps its agent instructions in a `CLAUDE.md` of about 7,500 words and its knowledge in five documents under `docs/` (*observed*). The instructions are loaded whole in every session, and the knowledge overlaps them.
+- **Decision:** each repository holds `CLAUDE.md` → `AGENTS.md`, `PRD.md`, `ARCHITECTURE.md`, `SDLC.md` and `README.md`, each answering one question (RN-DOC-001).
+- **Rationale:** a document per question gives each fact one home; `AGENTS.md`, loaded always, stays a short map pointing at sections instead of a copy of them.
+- **Consequences:** the writing map of `AGENTS.md` §3 becomes the arbiter of where a paragraph goes. The structure is tried here first; the main repository migrates only if it proves itself (*declared*).
+- **Date:** 2026-10-12. **Status:** Accepted. **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-002 CLAUDE.md is the AGENTS.md import
+
+- **Context:** Claude Code reads `CLAUDE.md`; other agents read `AGENTS.md`.
+- **Decision:** `CLAUDE.md` is the single line `@AGENTS.md` (RN-DOC-002).
+- **Rationale:** the import makes Claude Code load the instructions automatically in every session and sub-agent; a `CLAUDE.md` that mentioned `AGENTS.md` in prose would not. One file holds the instructions for every agent.
+- **Consequences:** nothing is written in `CLAUDE.md`; [INV-02](#inv-02-claudemd-is-only-the-import).
+- **Date:** 2026-10-12. **Status:** Superseded by [ADR-009](#adr-009-the-root-holds-only-what-a-tool-looks-for-there). **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-003 The version lives in the root package.json
+
+- **Context:** the main repository reads its version out of `CLAUDE.md` with a regex, which is what keeps that file from shrinking (*observed*).
+- **Decision:** the version lives in the `version` field of the root `package.json`, and nowhere else; `CHANGELOG.md` follows Keep a Changelog 1.1.0 (RN-VER-001, RN-VER-002).
+- **Rationale:** `package.json` is where the tooling of the organisation already looks for a version, and a field is read without a regex.
+- **Consequences:** every repository has a root `package.json`, even one with no package; [INV-01](#inv-01-the-version-has-one-home).
+- **Date:** 2026-10-12. **Status:** Accepted. **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-004 A GitHub template repository, copied once
+
+- **Context:** the organisation needs every new repository to start with its process written, with two or three repositories in sight (*declared*).
+- **Decision:** a GitHub template repository, copied once into each created repository and never synced, instead of a generator package or an organisation `.github` repository.
+- **Rationale:** a template needs no tooling to create a repository and no machinery to maintain; at this number of repositories, syncing costs more than it saves. An organisation `.github` repository is not created until the need for it is felt.
+- **Consequences:** an improvement made here does not reach the repositories already created; what a template does not copy, the settings of a repository, needs another mechanism.
+- **Date:** 2026-10-12. **Status:** Accepted. **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-005 GitHub's defaults for issues, pull requests and labels
+
+- **Context:** the main repository has issue forms and custom labels (*observed*).
+- **Decision:** GitHub's blank issue, no issue or pull request templates, GitHub's default labels. The format of a PR description lives as text in [`SDLC.md` §6](SDLC.md#6-pull-request).
+- **Rationale:** nothing to maintain or to copy, and the format of a PR is read where the process is.
+- **Consequences:** the PR format is followed by reading, not by a form.
+- **Date:** 2026-10-12. **Status:** Superseded by [ADR-008](#adr-008-githubs-default-labels-are-a-floor). **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-006 The npm scope @memorysmithapp
+
+- **Context:** repositories of the organisation will publish npm packages, the next one being `memorysmithapp/memorysmithapp-markdown` (*declared*).
+- **Decision:** every package published by a repository of the organisation uses the scope `@memorysmithapp`.
+- **Rationale:** the scope matches the GitHub organisation, so a package names where it lives.
+- **Consequences:** the root `package.json` of each repository is named under the scope, even when private. The scope was reserved on 2026-10-12, when the npm organisation `memorysmithapp` was created on the free plan; because that plan publishes public packages only, a published package declares public access and an unpublished one `"private": true` ([§4, npm](#4-integrations)).
+- **Date:** 2026-10-12. **Status:** Accepted. **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-007 The repository is its own first instance
+
+- **Context:** a starting point made of placeholders shows a structure but never proves it.
+- **Decision:** `AGENTS.md`, `PRD.md`, `ARCHITECTURE.md` and `SDLC.md` are real documents describing this repository; each marks which of its sections a created repository keeps and which it rewrites (RN-DOC-003).
+- **Rationale:** a structure that cannot describe a small repository will not describe a large one, and this repository is small and new enough that nothing breaks if a part is wrong.
+- **Consequences:** a created repository has an adoption step ([`AGENTS.md` §8](../AGENTS.md#8-adopting-this-repository), RN-ADO-001) that empties the content and keeps the process.
+- **Date:** 2026-10-12. **Status:** Accepted. **Origin:** reconstructed; declared by the owner in #1.
+
+### ADR-008 GitHub's default labels are a floor
+
+- **Context:** ADR-005 allowed GitHub's default labels and nothing else. A product repository needs to say which business domain an issue affects and which part of the product it touches, and `memorysmithapp/memorysmithapp` is the first to need it, with its `domain:` and `layer:` labels (*declared*). A created repository starts with no record of this section, so a rule written only in an ADR never reaches it.
+- **Decision:** GitHub's blank issue, and no issue or pull request templates, as in ADR-005. GitHub's default labels are the base and are never removed; a repository may add product label families on top of them, declared in [`SDLC.md` §2](SDLC.md#2-issues-and-milestones).
+- **Rationale:** the defaults cost nothing to keep, and a product needs to classify its issues by its own parts. How labels are used is process, and `SDLC.md` is kept on adoption, so the rule reaches every created repository.
+- **Consequences:** what a repository adds is written in `SDLC.md`, not in an ADR. No script creates labels: each family carries in `SDLC.md` the `gh label create` commands that create it.
+- **Date:** 2026-10-17. **Status:** Accepted. **Origin:** #23.
+
+### ADR-009 The root holds only what a tool looks for there
+
+- **Context:** every document sat at the root beside `package.json`, the lockfile and the dotfiles, which in a repository with code pushes the code down the listing a developer opens first. ADR-001 names the documents without saying where they live, and ADR-002 put `CLAUDE.md` at the root. Only some of these files have a reason to be there: GitHub renders `README.md` and detects `LICENSE` only at the root, the agents that read `AGENTS.md` look for it there, and `CHANGELOG.md` is there by Keep a Changelog's convention and because the scripts read it there (*observed*). Claude Code also loads `.claude/CLAUDE.md` (*observed* in fresh sessions, #24).
+- **Decision:** the root holds only what a tool or a convention looks for there. `PRD.md`, `ARCHITECTURE.md` and `SDLC.md` live in `docs/`. `CLAUDE.md` lives in `.claude/` as the single line `@../AGENTS.md`, and none sits at the root (RN-DOC-008).
+- **Rationale:** the root lists what a person or a tool opens first, and nothing looks for the three documents there. An `@` import resolves from the file that holds it, so the line in `.claude/` names the parent directory.
+- **Consequences:** documents in `docs/` link to the root through `../`. `.claude/` is tracked, so `.gitignore` keeps out what Claude Code writes there for one person: `settings.local.json` and `worktrees/`. Prose keeps naming a document by its file name (`SDLC.md` §2); only a link carries its path. [INV-02](#inv-02-claudemd-is-only-the-import) checks the new line and the absence of a root `CLAUDE.md`.
+- **Date:** 2026-10-17. **Status:** Accepted. **Origin:** #24.
+
+### ADR-010 Who merges to main is the branch protection's
+
+- **Context:** the team `contributors` has write on the repositories of the organization, and a contributor must not merge to `main` on their own. A `CODEOWNERS` file with a required code owner review was tried for it (#30): GitHub never lets the author of a pull request approve it, and the owner opens almost every pull request, so every merge of the owner's own became a bypass by *Organization admin*, and a bypass that is routine stops being noticed (*observed*, #39).
+- **Decision:** the ruleset `main` requires no approval and has no bypass actors; the branch protection of `main` restricts pushes, and so merges, to the team `maintainers`; no `CODEOWNERS` file exists. `scripts/setup-repo.sh` applies both.
+- **Rationale:** for a member of the team the merge is a permission, so nothing is bypassed and the button stays green, and the restriction still refuses a contributor. A review requested by a file would be requested of nobody when the owner is the author, and its line would promise an approval that never happens.
+- **Consequences:** a maintainer's merge is the review of a pull request to `main` ([`SDLC.md` §8](SDLC.md#8-tests-and-review)). A created repository needs the organization's team `maintainers` before the script runs. A ruleset rule *Restrict updates* with the team as bypass actor was the alternative, set aside because a member's merge would then be a bypass.
+- **Date:** 2026-11-16. **Status:** Accepted. **Origin:** #39.

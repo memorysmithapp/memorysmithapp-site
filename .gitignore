@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+.obsidian/
+*.swp
+
+# Claude Code: personal settings and the worktrees it creates
+.claude/settings.local.json
+.claude/worktrees/
