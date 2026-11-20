@@ -1,25 +1,109 @@
-# Tags and publishes a version once its bump is merged, so that nobody tags by hand, and closes
-# its milestone (scripts/release.mjs decides; scripts/close-milestone.mjs closes; SDLC.md §10
-# describes the flow). Uses only the workflow's GITHUB_TOKEN, and no stored secret.
+# Delivers production and then tags and publishes the version, once its bump is merged, so that
+# nobody tags by hand and no tag names a version production does not serve; then closes its
+# milestone (scripts/release.mjs decides; memorysmithapp-site-infra delivers;
+# scripts/close-milestone.mjs closes; SDLC.md §10 describes the flow, §11 the rollback). Reaches
+# AWS through OIDC, with no stored key, and GitHub with the workflow's GITHUB_TOKEN.
 name: Release
 
 on:
   push:
     branches: [main]
+  # Run on the tag of a released version, it delivers that version again: the rollback of SDLC.md §11.
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  # Changing a milestone needs it.
-  issues: write
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
+  plan:
+    name: Decide
+    runs-on: ubuntu-latest
+    outputs:
+      action: ${{ steps.plan.outputs.action }}
+      tag: ${{ steps.plan.outputs.tag }}
+    steps:
+      # A run started by hand on a branch would release whatever the branch holds.
+      - name: Refuse a run by hand on anything but a tag
+        if: github.event_name == 'workflow_dispatch' && github.ref_type != 'tag'
+        run: |
+          echo "::error::Run Release by hand only on the tag of a released version (SDLC.md §11), not on $GITHUB_REF."
+          exit 1
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          # The decision needs no dependency and no package manager.
+          package-manager-cache: false
+      - name: Decide
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs "$RUNNER_TEMP/notes.md" >> "$GITHUB_OUTPUT"
+
+  # Before the tag: a version is tagged only once production serves it.
+  deliver:
+    name: Deliver production
+    needs: plan
+    if: needs.plan.outputs.action != 'skip'
+    runs-on: ubuntu-latest
+    # The OIDC subject the delivery role trusts names this environment.
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable the pnpm pinned in package.json
+        run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Build the website
+        run: pnpm -C memorysmithapp-site-frontend build
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_PRODUCTION_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: site-production-${{ github.run_id }}
+      # The hosting and the release only: the delivery role is deployed by hand, never by a run.
+      - name: Deploy the hosting and the release
+        run: >-
+          pnpm -C memorysmithapp-site-infra exec cdk deploy
+          MemorysmithSiteHosting MemorysmithSiteRelease
+          --require-approval never --outputs-file "$RUNNER_TEMP/outputs.json"
+          -c commit="$GITHUB_SHA"
+      - name: Summary
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          url=$(node -e 'console.log(require(process.argv[1]).MemorysmithSiteHosting.SiteUrl)' "$RUNNER_TEMP/outputs.json")
+          {
+            echo "### Production"
+            echo ""
+            echo "- Version: \`${TAG#v}\` at \`${GITHUB_SHA::7}\`"
+            echo "- Served at: $url"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   release:
     name: Release
+    needs: [plan, deliver]
+    if: needs.plan.outputs.action != 'skip'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Changing a milestone needs it.
+      issues: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -28,8 +112,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-          # No dependency to cache, and the release needs no package manager.
           package-manager-cache: false
+      # Again, for the notes: a job does not see the files of another.
       - name: Decide
         id: plan
         env:
