@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `memorysmithapp-site-infra`, the CDK app of the website: a private S3 bucket behind CloudFront with Origin Access Control, the release of the frontend's build and of `/config.json` with the version it serves, and the role GitHub Actions delivers production with, through OIDC (#6).
 - `memorysmithapp-site-frontend`, the website, with Vite, React and TypeScript: one page that says it is under construction, points at `memorysmith.app`, and shows the version it serves, read from `/config.json` (#7).
 - The workflow *Release* delivers production before it tags: on the merge of a cut version it builds the website and deploys it to AWS through OIDC, and writes the tag and the Release only once production serves it. Run by hand on the tag of a released version, it delivers that version again (#8).
+- The cost of the website has its own line in the account's bill, under the tag `app:project` `memorysmith-site`: the log group of every function its stacks create is declared in its stack, tagged and kept 30 days, instead of being left untagged and kept forever (#10).
 
 ### Changed
 

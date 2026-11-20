@@ -6,9 +6,9 @@
  * deployed once, by hand, and never by a delivery (see its stack).
  */
 
-import { App, Tags } from 'aws-cdk-lib';
+import { App } from 'aws-cdk-lib';
 import { environmentOf, stackId } from '../config/environment.js';
-import { deploymentOf, tagDelivery } from '../constructs/deployment.js';
+import { deploymentOf, tagDelivery, tagProject } from '../constructs/deployment.js';
 import { GithubDeliveryStack } from '../stacks/github-delivery.stack.js';
 import { SiteHostingStack } from '../stacks/site-hosting.stack.js';
 import { SiteReleaseStack, siteConfigOf } from '../stacks/site-release.stack.js';
@@ -27,8 +27,5 @@ const release = new SiteReleaseStack(app, stackId('Release'), {
 });
 const delivery = new GithubDeliveryStack(app, stackId('GithubDelivery'), { env, environment });
 
-for (const stack of [hosting, release, delivery]) {
-  Tags.of(stack).add('app:project', 'memorysmith-site');
-  Tags.of(stack).add('app:environment', environment.name);
-}
+tagProject([hosting, release, delivery], environment.name);
 tagDelivery([hosting, release], deployment);

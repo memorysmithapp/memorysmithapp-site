@@ -31,6 +31,19 @@ export function deploymentOf(node: ContextReader, rootVersion: string = root.ver
 }
 
 /**
+ * Tags every stack of the website with what the bill is grouped by:
+ * `app:project` and `app:environment`, the cost allocation tags the account
+ * has active. `memorysmith-site` keeps the website's cost apart from the
+ * application's, `memorysmith`.
+ */
+export function tagProject(stacks: readonly Stack[], environment: string): void {
+  for (const stack of stacks) {
+    Tags.of(stack).add('app:project', 'memorysmith-site');
+    Tags.of(stack).add('app:environment', environment);
+  }
+}
+
+/**
  * Tags the stacks a deploy delivers with the version and the commit they serve.
  * Only those: the delivery role delivers every version, so a version written on
  * it would be false by construction.

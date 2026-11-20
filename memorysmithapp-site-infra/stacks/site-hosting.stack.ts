@@ -24,6 +24,7 @@ import {
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import type { Construct } from 'constructs';
+import { autoDeleteLogGroup } from '../constructs/log-groups.js';
 
 export class SiteHostingStack extends Stack {
   readonly bucket: Bucket;
@@ -40,6 +41,7 @@ export class SiteHostingStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
+    autoDeleteLogGroup(this, bucket);
 
     /**
      * A path with no extension is a page of the single-page app, and is

@@ -19,6 +19,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Deployment } from '../constructs/deployment.js';
+import { siteLogGroup } from '../constructs/log-groups.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 /** Where `pnpm -C memorysmithapp-site-frontend build` writes the website. */
@@ -55,6 +56,8 @@ export class SiteReleaseStack extends Stack {
     // The build is published only when it exists, so `cdk synth` works on a
     // clean checkout; the configuration is published either way.
     const built = existsSync(dist);
+    // Both deployments run on the one function the CDK shares between them, so they share its log group.
+    const logGroup = siteLogGroup(this, 'DeploymentLogs');
 
     if (built) {
       new BucketDeployment(this, 'SiteAssets', {
@@ -63,6 +66,7 @@ export class SiteReleaseStack extends Stack {
         cacheControl: [CacheControl.fromString('public, max-age=31536000, immutable')],
         prune: false,
         memoryLimit: 512,
+        logGroup,
       });
     }
 
@@ -77,6 +81,7 @@ export class SiteReleaseStack extends Stack {
       distributionPaths: ['/*'],
       prune: false,
       memoryLimit: 512,
+      logGroup,
     });
   }
 }

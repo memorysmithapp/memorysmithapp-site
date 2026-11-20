@@ -6,7 +6,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { environmentOf, stackId } from '../config/environment.js';
-import { deploymentOf } from '../constructs/deployment.js';
+import { deploymentOf, tagProject } from '../constructs/deployment.js';
 import { GithubDeliveryStack } from '../stacks/github-delivery.stack.js';
 import { SiteHostingStack } from '../stacks/site-hosting.stack.js';
 import { SiteReleaseStack, siteConfigOf } from '../stacks/site-release.stack.js';
@@ -34,6 +34,7 @@ export function synth(options: { context?: Record<string, string>; dist?: string
     ...(options.dist ? { dist: options.dist } : {}),
   });
   const delivery = new GithubDeliveryStack(app, stackId('GithubDelivery'), { env, environment });
+  tagProject([hosting, release, delivery], environment.name);
   return {
     hosting: Template.fromStack(hosting),
     release: Template.fromStack(release),
