@@ -9,8 +9,17 @@ The site does not exist in this repository yet: today it holds the documents it 
 With Node 24 and Corepack (`corepack enable`), from the root:
 
 ```sh
-pnpm run quality   # the checks the workflow Quality runs on every pull request
-pnpm test          # their tests
+pnpm install
+pnpm run quality         # the checks the workflow Quality runs on every pull request
+pnpm test                # their tests
+pnpm typecheck           # the type checks of the packages
+pnpm test:packages       # the tests of the packages
+```
+
+The infrastructure is a CDK app in [`memorysmithapp-site-infra`](memorysmithapp-site-infra); it synthesizes with no AWS credentials:
+
+```sh
+pnpm -C memorysmithapp-site-infra synth
 ```
 
 ## Repository settings

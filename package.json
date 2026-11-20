@@ -10,7 +10,9 @@
   },
   "scripts": {
     "quality": "node scripts/quality.mjs",
-    "test": "node --test \"scripts/**/*.test.mjs\""
+    "test": "node --test \"scripts/**/*.test.mjs\"",
+    "typecheck": "pnpm -r typecheck",
+    "test:packages": "pnpm -r test"
   },
   "packageManager": "pnpm@12.11.2"
 }

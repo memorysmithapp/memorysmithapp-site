@@ -8,7 +8,9 @@ Claims carry their status when it is not obvious: *observed*, *declared*, *infer
 
 *Instruction: what the system is made of, and how the parts relate.*
 
-The repository carries no site code yet. It is made of:
+It is made of:
+
+- **The infrastructure of the website**, `memorysmithapp-site-infra`: a CDK app in TypeScript that declares where the website is hosted, how a release is published into it, and the role a pipeline delivers with ([ADR-001](#adr-001-the-website-is-hosted-as-the-applications-interface)).
 
 - **Documents:** `.claude/CLAUDE.md` imports `AGENTS.md`; `AGENTS.md` maps the reading and the writing onto `PRD.md`, `ARCHITECTURE.md` and `SDLC.md`, which live in `docs/`, and `README.md`, and states the limits and invariants in one line each; `CHANGELOG.md` records what each version changed. The root holds only what a tool or a convention looks for there.
 - **Repository files:** `package.json`, the one home of the version; `.gitignore`, `.editorconfig` and `LICENSE`.
@@ -32,7 +34,17 @@ Each fact has one home ([`AGENTS.md` §3](../AGENTS.md#3-writing-map)): an invar
 | `docs/SDLC.md` | How a change travels from an issue to a release |
 | `README.md` | What this is and how to start; at the root, where GitHub renders it |
 | `CHANGELOG.md` | What changed in each version, in Keep a Changelog 1.1.0; at the root, by Keep a Changelog's convention and because the scripts read it there |
-| `package.json` | The one home of the version (`version`), the package manager pinned (`packageManager`), and the scripts `quality` and `test`; private, named `@memorysmithapp/site`, with no dependency |
+| `package.json` | The one home of the version (`version`), the package manager pinned (`packageManager`), and the scripts `quality`, `test`, `typecheck` and `test:packages`; private, named `@memorysmithapp/site`, the root of the workspace, with no dependency of its own |
+| `pnpm-workspace.yaml` | The packages of the workspace, and the one dependency allowed to run its install script, `esbuild` |
+| `memorysmithapp-site-infra/` | The CDK app of the website, `@memorysmithapp/site-infra`, private and with no `version` of its own (INV-01) |
+| `memorysmithapp-site-infra/cdk.json` | How the CDK runs the app, its feature flags, the account and region of `production`, and the repository and OIDC subject that may deliver |
+| `memorysmithapp-site-infra/bin/app.ts` | The app: which stacks a synth declares, and their tags |
+| `memorysmithapp-site-infra/config/environment.ts` | Reads the environment from `cdk.json`, field by field, and names the stacks |
+| `memorysmithapp-site-infra/constructs/deployment.ts` | What a deploy says about itself: the environment, the version of the root `package.json` and the commit, and the tags that carry them |
+| `memorysmithapp-site-infra/stacks/site-hosting.stack.ts` | The stack `MemorysmithSiteHosting`: the private bucket and the CloudFront distribution |
+| `memorysmithapp-site-infra/stacks/site-release.stack.ts` | The stack `MemorysmithSiteRelease`: the build of the frontend and `/config.json`, published into the bucket |
+| `memorysmithapp-site-infra/stacks/github-delivery.stack.ts` | The stack `MemorysmithSiteGithubDelivery`: the role GitHub Actions delivers with, deployed by hand |
+| `memorysmithapp-site-infra/test/` | Tests of the synthesized templates, on `vitest` and `aws-cdk-lib/assertions` |
 | `scripts/setup-repo.sh` | Applies the settings a copy does not carry to the repository; uses only `gh` and `jq`; the mechanism of INV-03 |
 | `scripts/quality.mjs` | The checks of the workflow *Quality*, Node only |
 | `scripts/quality.test.mjs` | The tests of the checks, one deliberate violation each, on `node:test` |
@@ -43,8 +55,8 @@ Each fact has one home ([`AGENTS.md` §3](../AGENTS.md#3-writing-map)): an invar
 | `scripts/lib/changelog.mjs` | Reads `CHANGELOG.md`: its sections, categories, link definitions and the notes of a version |
 | `.github/workflows/quality.yml` | The workflow *Quality*, job `Quality` |
 | `.github/workflows/release.yml` | The workflow *Release*, which writes the tag and the GitHub Release of a merged version and closes its milestone |
-| `pnpm-lock.yaml` | Written by pnpm; with no dependency, it records only the pinned pnpm |
-| `.gitignore` | Dependencies, build output, coverage, environment files, logs, operating-system and editor files, and Claude Code's personal settings and worktrees under `.claude/` |
+| `pnpm-lock.yaml` | Written by pnpm: the exact version of every dependency of the workspace |
+| `.gitignore` | Dependencies, build output, coverage, the CDK's `cdk.out/`, environment files, logs, operating-system and editor files, and Claude Code's personal settings and worktrees under `.claude/` |
 | `.editorconfig` | UTF-8, LF, two spaces, final newline |
 | `LICENSE` | The MIT licence; at the root, the only place GitHub detects it |
 
@@ -106,6 +118,13 @@ The link condition exists because a repository created from `memorysmithapp-temp
 - *Issues and milestones:* GitHub's blank issue, its default labels and the product label families a repository declares in [`SDLC.md` §2](SDLC.md#2-issues-and-milestones); a milestone per version, closed by the workflow *Release* once the version is released.
 - *Actions:* the workflows *Quality* and *Release* on `ubuntu-latest`, with Node 24 from `actions/setup-node` and the pnpm of `packageManager` through Corepack. Nothing they run installs a system package, so the label is left to follow GitHub's images.
 
+**AWS.** The website lives in the account and the region of the application, `364362227104` in `us-east-1`, which `cdk.json` names so the CDK refuses any other (*observed* in the application's own `cdk.json`, which this one repeats):
+
+- *S3 and CloudFront:* a private bucket, encrypted by S3 and reachable only over TLS, that only the distribution reads, through Origin Access Control. The distribution redirects HTTP to HTTPS, serves HTTP/2 and HTTP/3 from price class 100, with the managed security-headers policy, and a CloudFront Function answers a path with no extension with `/index.html`. It answers on its own `*.cloudfront.net` host, which the output `SiteUrl` of `MemorysmithSiteHosting` names: `www.memorysmith.app` is #4's.
+- *The release:* two `BucketDeployment`s of `aws-s3-deployment`. The hashed files under `assets/` go with `public, max-age=31536000, immutable`; `index.html`, the other files of the build and `/config.json` go with `no-cache, must-revalidate`, and invalidate `/*`. Nothing is pruned, so a visitor holding the entry document of the previous release still finds its assets. `/config.json` holds the environment, the version and the commit; a synth with no build publishes it alone.
+- *IAM:* the role `memorysmith-site-github`, assumed through the account's GitHub OIDC provider, which the application's stack `MemorysmithGithubDelivery` declares and this app only trusts, by the `sub` of this repository's GitHub environment `production` with GitHub's immutable ids (`repo:memorysmithapp@311768902/memorysmithapp-site@1465855023:environment:production`, *observed* with `gh api`). It may only assume the roles of `cdk bootstrap`, qualifier `hnb659fds`, which the application bootstrapped in the account.
+- *Tags:* every stack carries `app:project` `memorysmith-site` and `app:environment` `production`; the hosting and the release also carry `app:version` and `deploy:sha`, the version and the commit they serve.
+
 **npm.** Any package a repository of the organisation publishes uses the scope `@memorysmithapp`. The npm organisation `memorysmithapp` exists since 2026-10-12, which reserves the scope, and is on the **free plan, which publishes public packages only**; a private package would need the paid Teams plan (*declared* by the owner). No npm token exists (*declared*). Therefore, in the `package.json` of every repository of the organisation:
 
 - **A package published under `@memorysmithapp` declares `"publishConfig": { "access": "public" }`.** npm publishes a scoped package as *restricted* by default, and on the free plan that publish fails with `402 Payment Required`; written in `package.json`, the access does not depend on somebody remembering `--access public`.
@@ -120,10 +139,20 @@ The link condition exists because a repository created from `memorysmithapp-temp
 
 **Release** (`.github/workflows/release.yml`) runs on every push to `main`, reads the repository it runs in from `GITHUB_REPOSITORY`, one run at a time (`concurrency: release`), with `contents: write` and `issues: write` for the workflow's own `GITHUB_TOKEN` and no stored secret: it pushes the tag with git, as `github-actions[bot]`, reads whether a Release exists and creates it with `gh`, and closes the milestone through the REST API with `gh` in `scripts/close-milestone.mjs`, which GitHub allows only with `issues: write`. That step runs when the decision is `release` or `tagged`, writes what it did to the run summary, and fails only when GitHub cannot be read or written. A tag pushed with that token starts no other workflow.
 
-There is no deployable yet. `scripts/setup-repo.sh` runs on a person's machine, once when the repository is created and again whenever its settings drift, with the permissions of the administrator whose `gh` it uses; it needs no token of its own. It refuses a repository not owned by an organization, an organization without the team `maintainers`, and a repository whose default branch has no commit yet, since a branch protection names an existing branch.
+**The CDK app** synthesizes with no AWS credentials, since it looks nothing up. Deploying it needs credentials of the account: `MemorysmithSiteGithubDelivery` is deployed once, by hand, with an administrator's, and the hosting and the release are deployed with the role it creates.
+
+`scripts/setup-repo.sh` runs on a person's machine, once when the repository is created and again whenever its settings drift, with the permissions of the administrator whose `gh` it uses; it needs no token of its own. It refuses a repository not owned by an organization, an organization without the team `maintainers`, and a repository whose default branch has no commit yet, since a branch protection names an existing branch.
 
 ## 6. Architecture decision records
 
 *Instruction: the decisions behind the architecture, one record each, in the format below.*
 
 Each record has an identifier, never reused; its context, decision, rationale and consequences; its date, status and **origin**. A decision that changes keeps its old record, marked *Superseded by ADR-NNN*, and a new record states the new decision.
+
+### ADR-001 The website is hosted as the application's interface
+
+- **Context:** the website has to be served, and the organization already serves the application's interface, `memorysmithapp-frontend`, as a static build on AWS, delivered by a CDK app of its own repository.
+- **Decision:** the website is a static build on a private S3 bucket behind CloudFront with Origin Access Control, declared by a CDK app in TypeScript, `memorysmithapp-site-infra`, in the application's account and region. As the interface does, the page reads at runtime from `/config.json` what the release publishes there, never from the bundle. It has one environment, production, and no staging.
+- **Rationale:** one way of hosting a static site in the organization. The same services, the same constructs and the same bootstrap of the account mean that whoever maintains one knows the other, and nothing is paid for a server. A build that does not know its version can be built once and published anywhere.
+- **Consequences:** the website depends on the bootstrap of the application's account and on its GitHub OIDC provider, and a change to either reaches it. Until #4 it answers on its CloudFront host alone.
+- **Date:** 2026-11-20. **Status:** accepted. **Origin:** #5, #6.

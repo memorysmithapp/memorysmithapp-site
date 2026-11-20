@@ -1,0 +1,16 @@
+{
+  "app": "npx tsx bin/app.ts",
+  "context": {
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/core:validateSnapshotRemovalPolicy": true,
+    "@aws-cdk/core:enablePartitionLiterals": true,
+    "@aws-cdk/core:defaultCrossStackReferences": "strong",
+    "production": {
+      "account": "364362227104",
+      "region": "us-east-1"
+    },
+    "repository": "memorysmithapp/memorysmithapp-site",
+    "repositorySubject": "repo:memorysmithapp@311768902/memorysmithapp-site@1465855023"
+  }
+}

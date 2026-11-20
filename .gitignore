@@ -23,3 +23,7 @@ Thumbs.db
 # Claude Code: personal settings and the worktrees it creates
 .claude/settings.local.json
 .claude/worktrees/
+
+# The CDK's synthesized output, and the frontend's local runtime configuration
+cdk.out/
+memorysmithapp-site-frontend/config.local.json
