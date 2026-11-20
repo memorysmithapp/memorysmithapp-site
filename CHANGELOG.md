@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-20
+
 ### Added
 
 - `memorysmithapp-site-infra`, the CDK app of the website: a private S3 bucket behind CloudFront with Origin Access Control, the release of the frontend's build and of `/config.json` with the version it serves, and the role GitHub Actions delivers production with, through OIDC (#6).
@@ -17,4 +19,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The workflow *Quality* also type-checks, tests and builds the website and its infrastructure (#8).
 - The repository adopts `memorysmithapp-template` v0.5.1: `AGENTS.md`, `README.md` and `package.json` name `memorysmithapp-site`; `docs/PRD.md` and `docs/ARCHITECTURE.md` keep their skeletons and the description of the parts kept; the version restarts at `0.1.0` and the changelog names this repository (#2).
 
-[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/commits/main
+[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/memorysmithapp/memorysmithapp-site/releases/tag/v0.1.0
