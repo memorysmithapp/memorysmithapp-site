@@ -1,34 +1,10 @@
-# memorysmithapp-template
+# memorysmithapp-site
 
-The starting point of every new repository of the [`memorysmithapp`](https://github.com/memorysmithapp) organisation. It carries no product code: it carries the documents humans and agents work by — how an agent works here, what the product delivers, how it is organised, how a change travels to a release — so that a new repository starts with its process already written. It is its own first instance: its documents describe this repository, and a new repository rewrites the parts that are its own and keeps the process.
+The website of [MemorySmith](https://memorysmith.app), served at `www.memorysmith.app`: the showcase that presents the product.
 
-## Create a repository from it
+The site does not exist in this repository yet: today it holds the documents it is built by and the checks that keep them true.
 
-You need a GitHub account with permission to create repositories in the organisation, and, for the command line, the [GitHub CLI](https://cli.github.com/) authenticated (`gh auth login`).
-
-Either press **Use this template → Create a new repository** on this repository's page on GitHub, or run:
-
-```sh
-gh repo create memorysmithapp/<name> --template memorysmithapp/memorysmithapp-template --public --clone
-```
-
-The new repository receives a copy of these files in one initial commit, and keeps no link to this one: an improvement made here later does not reach it.
-
-## Apply the settings a copy does not carry
-
-A copy carries files, not settings. From the root of the new clone, with `gh` authenticated as an administrator of the new repository and [`jq`](https://jqlang.org/) installed, run once:
-
-```sh
-scripts/setup-repo.sh memorysmithapp/<name> "<description>" <topic>[,<topic>...]
-```
-
-It sets the description and the topics, allows merge, squash and rebase, turns the wiki and discussions off, creates the ruleset `main` that protects the default branch (no deletion, no force push, every change through a pull request with the check `Quality`), gives the organisation's team `maintainers` write on the repository, and sets the branch protection that lets only that team merge to the default branch. The organisation must have the team `maintainers`; a repository owned by a person is refused. It prints what it changed and what was already in place; running it again changes nothing. It stays in the new repository after the adoption: run it again whenever the ruleset, the branch protection or the settings drift, and it puts back only what differs.
-
-## Adopt it in the first session
-
-Open a [Claude Code](https://claude.com/claude-code) session at the root of the new repository. `.claude/CLAUDE.md` imports `AGENTS.md`, so the session starts with the instructions loaded. Until the adoption, the check `Quality` fails on the new repository, saying that `CHANGELOG.md` still links to `memorysmithapp-template`; nothing is released there before it. Ask the session to adopt the repository: it follows [`AGENTS.md` §8](AGENTS.md#8-adopting-this-repository), opening an adoption issue and working on the branch `docs/adopt-template`. In one commit it rewrites the identity and the README, empties `PRD.md` and `ARCHITECTURE.md` down to their skeletons while keeping what the process relies on, resets the version and the changelog, and keeps `SDLC.md` and the rules. Then it opens a pull request of its own: review and merge it before any other work, and `main` passes `Quality` from then on.
-
-## Check the documents
+## Start
 
 With Node 24 and Corepack (`corepack enable`), from the root:
 
@@ -36,6 +12,18 @@ With Node 24 and Corepack (`corepack enable`), from the root:
 pnpm run quality   # the checks the workflow Quality runs on every pull request
 pnpm test          # their tests
 ```
+
+## Repository settings
+
+The settings a copy of the files does not carry — description, topics, merge options, wiki and discussions off, the ruleset `main` that protects the default branch, write for the organisation's team `maintainers`, and the branch protection that lets only that team merge to `main` — are applied by a script, with `gh` authenticated as an administrator and [`jq`](https://jqlang.org/) installed. It was run with:
+
+```sh
+scripts/setup-repo.sh memorysmithapp/memorysmithapp-site \
+  "The showcase of MemorySmith: the website served at www.memorysmith.app." \
+  memorysmith,website,landing-page
+```
+
+It is idempotent: run it again whenever the ruleset, the branch protection or the settings drift, and it puts back only what differs.
 
 ## The documents
 
