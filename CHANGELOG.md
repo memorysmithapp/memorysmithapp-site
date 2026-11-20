@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - `memorysmithapp-site-infra`, the CDK app of the website: a private S3 bucket behind CloudFront with Origin Access Control, the release of the frontend's build and of `/config.json` with the version it serves, and the role GitHub Actions delivers production with, through OIDC (#6).
+- `memorysmithapp-site-frontend`, the website, with Vite, React and TypeScript: one page that says it is under construction, points at `memorysmith.app`, and shows the version it serves, read from `/config.json` (#7).
 
 ### Changed
 

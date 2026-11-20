@@ -10,6 +10,7 @@ Claims carry their status when it is not obvious: *observed*, *declared*, *infer
 
 It is made of:
 
+- **The website**, `memorysmithapp-site-frontend`: a single page built with Vite, React and TypeScript, the stack of the application's interface, that reads at runtime from `/config.json` the version it serves.
 - **The infrastructure of the website**, `memorysmithapp-site-infra`: a CDK app in TypeScript that declares where the website is hosted, how a release is published into it, and the role a pipeline delivers with ([ADR-001](#adr-001-the-website-is-hosted-as-the-applications-interface)).
 
 - **Documents:** `.claude/CLAUDE.md` imports `AGENTS.md`; `AGENTS.md` maps the reading and the writing onto `PRD.md`, `ARCHITECTURE.md` and `SDLC.md`, which live in `docs/`, and `README.md`, and states the limits and invariants in one line each; `CHANGELOG.md` records what each version changed. The root holds only what a tool or a convention looks for there.
@@ -36,6 +37,15 @@ Each fact has one home ([`AGENTS.md` §3](../AGENTS.md#3-writing-map)): an invar
 | `CHANGELOG.md` | What changed in each version, in Keep a Changelog 1.1.0; at the root, by Keep a Changelog's convention and because the scripts read it there |
 | `package.json` | The one home of the version (`version`), the package manager pinned (`packageManager`), and the scripts `quality`, `test`, `typecheck` and `test:packages`; private, named `@memorysmithapp/site`, the root of the workspace, with no dependency of its own |
 | `pnpm-workspace.yaml` | The packages of the workspace, and the one dependency allowed to run its install script, `esbuild` |
+| `memorysmithapp-site-frontend/` | The website, `@memorysmithapp/site-frontend`, private and with no `version` of its own (INV-01); `pnpm build` writes it to `dist/` |
+| `memorysmithapp-site-frontend/index.html` | The entry document: the icons, the fonts of the brand from Google Fonts, and the script |
+| `memorysmithapp-site-frontend/vite.config.ts` | The build, and the answer of `vite dev` to `/config.json` from the untracked `config.local.json` |
+| `memorysmithapp-site-frontend/config.example.json` | What `config.local.json` holds on a workstation |
+| `memorysmithapp-site-frontend/public/` | The MemorySmith symbol, light and dark, and its icons, copied from `memorysmithapp-frontend` |
+| `memorysmithapp-site-frontend/src/runtime-config.ts` | Reads and validates `/config.json`, never from the cache |
+| `memorysmithapp-site-frontend/src/UnderConstruction.tsx` | The page, and `src/main.tsx` renders it and hands it the version |
+| `memorysmithapp-site-frontend/src/styles.css` | The tokens of the brand, light and dark, and the layout of the page |
+| `memorysmithapp-site-frontend/src/*.test.ts*` | Tests of the configuration and of the page, on `vitest`, the page rendered to static markup |
 | `memorysmithapp-site-infra/` | The CDK app of the website, `@memorysmithapp/site-infra`, private and with no `version` of its own (INV-01) |
 | `memorysmithapp-site-infra/cdk.json` | How the CDK runs the app, its feature flags, the account and region of `production`, and the repository and OIDC subject that may deliver |
 | `memorysmithapp-site-infra/bin/app.ts` | The app: which stacks a synth declares, and their tags |

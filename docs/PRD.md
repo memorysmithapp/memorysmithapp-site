@@ -16,6 +16,8 @@ Claims carry their status when it is not obvious: *observed* (seen in this repos
 
 *Instruction: what the current version delivers, and what it deliberately does not.*
 
+The website is one page that says it is under construction, points at the product at `memorysmith.app`, and shows the version it serves. It does not present the product yet, and it does not answer at `www.memorysmith.app` yet (#4).
+
 ## 4. Principles
 
 *Instruction: the product principles behind the decisions, each in one sentence.*
@@ -34,6 +36,8 @@ Claims carry their status when it is not obvious: *observed* (seen in this repos
 
 Codes are append-only: never renumbered, never reused. A rule that stops holding stays on its own line, marked **Removed** with the version and the reason.
 
+- **RN-SITE-001** The page shows the version it serves, as the release that published it names it, never as a build remembers it.
+
 ## 8. Quality requirements
 
 *Instruction: the measurable qualities the product holds, each with its threshold.*
@@ -41,3 +45,5 @@ Codes are append-only: never renumbered, never reused. A rule that stops holding
 ## 9. Acceptance criteria
 
 *Instruction: how each rule is checked, by its code.*
+
+- **RN-SITE-001** Served with a `/config.json` that names a version, the page shows `Version` followed by it; while that file is read, or when it cannot be, the page shows no version. Checked by the tests of `memorysmithapp-site-frontend` and by opening the page production serves.

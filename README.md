@@ -2,7 +2,7 @@
 
 The website of [MemorySmith](https://memorysmith.app), served at `www.memorysmith.app`: the showcase that presents the product.
 
-The site does not exist in this repository yet: today it holds the documents it is built by and the checks that keep them true.
+It holds the website, in [`memorysmithapp-site-frontend`](memorysmithapp-site-frontend), its infrastructure on AWS, in [`memorysmithapp-site-infra`](memorysmithapp-site-infra), the documents it is built by, and the checks that keep them true.
 
 ## Start
 
@@ -14,6 +14,14 @@ pnpm run quality         # the checks the workflow Quality runs on every pull re
 pnpm test                # their tests
 pnpm typecheck           # the type checks of the packages
 pnpm test:packages       # the tests of the packages
+```
+
+The website runs on a workstation with the version a local `config.local.json` names:
+
+```sh
+cp memorysmithapp-site-frontend/config.example.json memorysmithapp-site-frontend/config.local.json
+pnpm -C memorysmithapp-site-frontend dev     # http://localhost:5173
+pnpm -C memorysmithapp-site-frontend build   # the build a release publishes, in dist/
 ```
 
 The infrastructure is a CDK app in [`memorysmithapp-site-infra`](memorysmithapp-site-infra); it synthesizes with no AWS credentials:
