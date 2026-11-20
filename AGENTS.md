@@ -77,6 +77,7 @@ Each command with the directory it runs in, what it does, and the date somebody 
 | `pnpm test:packages` | The root, after `pnpm install` | Runs the tests of both packages | 2026-11-20 |
 | `pnpm -C memorysmithapp-site-frontend build` | The root | Builds the website into `memorysmithapp-site-frontend/dist/` | 2026-11-20 |
 | `pnpm -C memorysmithapp-site-infra synth` | The root | Synthesizes the three stacks, with no AWS credentials, into `memorysmithapp-site-infra/cdk.out/` | 2026-11-20 |
+| `AWS_PROFILE=<profile> pnpm -C memorysmithapp-site-infra exec cdk deploy MemorysmithSiteGithubDelivery` | The root | Creates or updates the delivery role, once, by hand; never `pnpm deploy`, which is pnpm's own command | 2026-11-20 |
 
 ## 7. Before calling something done
 

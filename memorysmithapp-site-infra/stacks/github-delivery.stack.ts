@@ -13,7 +13,10 @@
  * deployed once, by hand, from a workstation with administrator credentials,
  * and never by a delivery, so no run can change what it may do:
  *
- *   pnpm -C memorysmithapp-site-infra deploy MemorysmithSiteGithubDelivery
+ *   pnpm -C memorysmithapp-site-infra exec cdk deploy MemorysmithSiteGithubDelivery
+ *
+ * (`pnpm deploy` is a command of pnpm itself, so the CDK is called through
+ * `exec`.)
  *
  * What the role may do is what a delivery does: assume the roles `cdk
  * bootstrap` created, which deploy. Those roles can change anything in the
