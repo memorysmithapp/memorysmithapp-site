@@ -1,5 +1,6 @@
 # The checks of what the documents promise about themselves and the version (scripts/quality.mjs),
-# and their tests. The job is named Quality, the status check the ruleset `main` requires.
+# and their tests; then the type checks, the tests and the builds of the website and of its
+# infrastructure. The job is named Quality, the status check the ruleset `main` requires.
 name: Quality
 
 on:
@@ -21,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-          # No dependency to cache, and pnpm is not on the PATH until Corepack is enabled.
+          # pnpm is not on the PATH until Corepack is enabled, so setup-node cannot cache its store.
           package-manager-cache: false
       - name: Enable the pnpm pinned in package.json
         run: corepack enable
@@ -29,3 +30,14 @@ jobs:
         run: pnpm run quality
       - name: Test the checks
         run: pnpm test
+      - name: Install the workspace
+        run: pnpm install --frozen-lockfile
+      - name: Type-check the packages
+        run: pnpm typecheck
+      - name: Test the packages
+        run: pnpm test:packages
+      - name: Build the website
+        run: pnpm -C memorysmithapp-site-frontend build
+      # With the build in place, as a delivery synthesizes it, and with no AWS credentials.
+      - name: Synthesize the infrastructure
+        run: pnpm -C memorysmithapp-site-infra synth

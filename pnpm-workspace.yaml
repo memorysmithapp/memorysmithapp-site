@@ -1,0 +1,7 @@
+packages:
+  - memorysmithapp-site-frontend
+  - memorysmithapp-site-infra
+
+allowBuilds:
+  # The bundler of Vite and of tsx installs its native binary.
+  esbuild: true

@@ -1,0 +1,103 @@
+/* The brand tokens of memorysmithapp-frontend: Azul cofre #0F56D7, Laranja
+   sinal #FF8A2B, Tinta #0E1526, Papel #EDEFEC, and Fundo escuro #0B1220 with
+   the light blue #4C8DFF and orange #FF9A45 of the dark theme. */
+
+:root {
+  --bg: #edefec;
+  --text: #0e1526;
+  --text-soft: #545d73;
+  --accent: #0f56d7;
+  --signal: #ff8a2b;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1220;
+    --text: #edefec;
+    --text-soft: #a9b1c3;
+    --accent: #4c8dff;
+    --signal: #ff9a45;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+.page {
+  min-height: 100vh;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.symbol img {
+  width: 8rem;
+  height: auto;
+}
+
+.brand {
+  margin: 1rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent);
+}
+
+h1 {
+  margin: 0.5rem 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 0.25rem;
+  margin: 1rem auto 0;
+  border-radius: 0.125rem;
+  background: var(--signal);
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 1.0625rem;
+}
+
+a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.version {
+  margin-top: 3rem;
+  color: var(--text-soft);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
