@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from 'node:fs';
-import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
 /**
@@ -32,5 +31,5 @@ function localRuntimeConfig(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), localRuntimeConfig()],
+  plugins: [localRuntimeConfig()],
 });

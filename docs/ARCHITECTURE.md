@@ -10,7 +10,7 @@ Claims carry their status when it is not obvious: *observed*, *declared*, *infer
 
 It is made of:
 
-- **The website**, `memorysmithapp-site-frontend`: a single page built with Vite, React and TypeScript, the stack of the application's interface, that reads at runtime from `/config.json` the version it serves.
+- **The website**, `memorysmithapp-site-frontend`: a single landing page in HTML, CSS and JavaScript, bundled by Vite ([ADR-003](#adr-003-the-landing-page-is-plain-html-css-and-javascript)), with a 3D background drawn by Three.js from cdnjs, that reads at runtime from `/config.json` the version it serves.
 - **The infrastructure of the website**, `memorysmithapp-site-infra`: a CDK app in TypeScript that declares where the website is hosted, how a release is published into it, and the role a pipeline delivers with ([ADR-001](#adr-001-the-website-is-hosted-as-the-applications-interface)).
 
 - **Documents:** `.claude/CLAUDE.md` imports `AGENTS.md`; `AGENTS.md` maps the reading and the writing onto `PRD.md`, `ARCHITECTURE.md` and `SDLC.md`, which live in `docs/`, and `README.md`, and states the limits and invariants in one line each; `CHANGELOG.md` records what each version changed. The root holds only what a tool or a convention looks for there.
@@ -38,14 +38,17 @@ Each fact has one home ([`AGENTS.md` §3](../AGENTS.md#3-writing-map)): an invar
 | `package.json` | The one home of the version (`version`), the package manager pinned (`packageManager`), and the scripts `quality`, `test`, `typecheck` and `test:packages`; private, named `@memorysmithapp/site`, the root of the workspace, with no dependency of its own |
 | `pnpm-workspace.yaml` | The packages of the workspace, and the one dependency allowed to run its install script, `esbuild` |
 | `memorysmithapp-site-frontend/` | The website, `@memorysmithapp/site-frontend`, private and with no `version` of its own (INV-01); `pnpm build` writes it to `dist/` |
-| `memorysmithapp-site-frontend/index.html` | The entry document: the icons, the fonts of the brand from Google Fonts, and the script |
+| `memorysmithapp-site-frontend/index.html` | The landing page: its sections, the icons, the fonts of the brand from Google Fonts, Three.js from cdnjs, and the scripts |
 | `memorysmithapp-site-frontend/vite.config.ts` | The build, and the answer of `vite dev` to `/config.json` from the untracked `config.local.json` |
 | `memorysmithapp-site-frontend/config.example.json` | What `config.local.json` holds on a workstation |
-| `memorysmithapp-site-frontend/public/` | The MemorySmith symbol, light and dark, and its icons, copied from `memorysmithapp-frontend` |
+| `memorysmithapp-site-frontend/public/` | The MemorySmith symbol and its icons, copied from `memorysmithapp-frontend`, served under their own names |
 | `memorysmithapp-site-frontend/src/runtime-config.ts` | Reads and validates `/config.json`, never from the cache |
-| `memorysmithapp-site-frontend/src/UnderConstruction.tsx` | The page, and `src/main.tsx` renders it and hands it the version |
-| `memorysmithapp-site-frontend/src/styles.css` | The tokens of the brand, light and dark, and the layout of the page |
-| `memorysmithapp-site-frontend/src/*.test.ts*` | Tests of the configuration and of the page, on `vitest`, the page rendered to static markup |
+| `memorysmithapp-site-frontend/src/version.ts` | Writes the version `/config.json` names into the footer |
+| `memorysmithapp-site-frontend/src/main.js` | The interactive moments of the page: the hero's scenes, the capabilities tabs, the connect guides, the carousel of models and the questions |
+| `memorysmithapp-site-frontend/src/background.js` | The 3D background: the brand symbol in particles, drawn still when less motion is asked for |
+| `memorysmithapp-site-frontend/src/style.css` | The tokens of the brand, dark only, and the layout of the page |
+| `memorysmithapp-site-frontend/src/assets/` | The logo and the pictures of the models, hashed into `assets/` by the build |
+| `memorysmithapp-site-frontend/src/*.test.ts` | Tests of the configuration and of the version in the footer, on `vitest` |
 | `memorysmithapp-site-infra/` | The CDK app of the website, `@memorysmithapp/site-infra`, private and with no `version` of its own (INV-01); its scripts are `typecheck`, `synth` and `test`, and a deploy calls the CDK through `pnpm exec`, since `pnpm deploy` is pnpm's own command |
 | `memorysmithapp-site-infra/cdk.json` | How the CDK runs the app, its feature flags, the account, region, domain name and zone of `production`, and the repository and OIDC subject that may deliver |
 | `memorysmithapp-site-infra/bin/app.ts` | The app: which stacks a synth declares, and their tags |
@@ -180,3 +183,11 @@ Each record has an identifier, never reused; its context, decision, rationale an
 - **Rationale:** a tag then always names a version that production has served. Since what is delivered reaches `main` only through the pull request of a cycle, which carries its cut ([`SDLC.md` §3](SDLC.md#3-branches)), delivering on the cut loses no change. One workflow keeps one place for the order.
 - **Consequences:** a delivery that fails leaves the version untagged, and running the workflow again finishes it. Production returns to an earlier version by running *Release* on its tag ([`SDLC.md` §11](SDLC.md#11-rollback)).
 - **Date:** 2026-11-20. **Status:** accepted. **Origin:** #5, #8.
+
+### ADR-003 The landing page is plain HTML, CSS and JavaScript
+
+- **Context:** the landing page was designed and built outside this repository, in `PedroBaliz/MemorySmith-Site`, as static HTML, CSS and JavaScript, while this repository served a React page under construction.
+- **Decision:** the page is kept as HTML, CSS and JavaScript, and Vite bundles it: its scripts, styles and pictures are hashed into `assets/`, and `index.html` stays the one entry document. React leaves the frontend. Three.js is loaded from cdnjs, as the page was designed.
+- **Rationale:** rewriting the page in React would change nothing a visitor sees and would cost a translation of every section; hashing everything but `index.html` keeps the release's two cache rules true ([`site-release.stack.ts`](../memorysmithapp-site-infra/stacks/site-release.stack.ts)).
+- **Consequences:** the website no longer shares the application interface's component stack; the scripts are not type-checked, only `version.ts` and `runtime-config.ts` are. The 3D background depends on cdnjs answering, and the page works without it.
+- **Date:** 2026-11-21. **Status:** accepted. **Origin:** #13.
