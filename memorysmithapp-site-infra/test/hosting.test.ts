@@ -61,10 +61,33 @@ describe('the hosting of the website', () => {
     });
   });
 
-  it('claims no domain name, which the application still holds (#4)', () => {
-    const [distribution] = Object.values(hosting.findResources('AWS::CloudFront::Distribution'));
-    expect(distribution?.['Properties']?.['DistributionConfig']?.['Aliases']).toBeUndefined();
-    hosting.resourceCountIs('AWS::Route53::RecordSet', 0);
-    hosting.resourceCountIs('AWS::CertificateManager::Certificate', 0);
+  it('answers on www.memorysmith.app, with a certificate of its own validated in the zone (#4)', () => {
+    hosting.hasResourceProperties('AWS::CertificateManager::Certificate', {
+      DomainName: 'www.memorysmith.app',
+      ValidationMethod: 'DNS',
+      DomainValidationOptions: [
+        { DomainName: 'www.memorysmith.app', HostedZoneId: 'Z1003210YHFJUFXNHOVX' },
+      ],
+    });
+    hosting.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        Aliases: ['www.memorysmith.app'],
+        ViewerCertificate: Match.objectLike({ SslSupportMethod: 'sni-only' }),
+      }),
+    });
+  });
+
+  it('writes its A and AAAA records in the zone of the application, and nothing at the apex', () => {
+    for (const type of ['A', 'AAAA']) {
+      hosting.hasResourceProperties('AWS::Route53::RecordSet', {
+        Name: 'www.memorysmith.app.',
+        Type: type,
+        HostedZoneId: 'Z1003210YHFJUFXNHOVX',
+        AliasTarget: Match.objectLike({
+          DNSName: { 'Fn::GetAtt': [Match.stringLikeRegexp('^Distribution'), 'DomainName'] },
+        }),
+      });
+    }
+    hosting.resourceCountIs('AWS::Route53::RecordSet', 2);
   });
 });
