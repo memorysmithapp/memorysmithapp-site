@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The website presents the product: the landing page of MemorySmith, in Brazilian Portuguese, replaces the page under construction, with its sections, its carousel of models, its questions and its 3D background, and the version it serves in its footer. It is dark only, and comes without the theme toggle, the accessibility panel, the contact section and the sign-in page of its design; its sign-in and subscription calls lead to `memorysmith.app` (#13).
+
+### Removed
+
+- React, from the website: the page is HTML, CSS and JavaScript bundled by Vite (#13).
+
 ## [0.2.0] - 2026-11-20
 
 ### Added

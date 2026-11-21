@@ -1,24 +1,526 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MemorySmith: notebooks of Markdown notes that say how they want to be written." />
-    <meta name="color-scheme" content="light dark" />
-    <title>MemorySmith</title>
-    <link rel="icon" type="image/png" sizes="192x192" href="/symbol-192.png" />
-    <link rel="icon" type="image/png" sizes="48x48" href="/symbol-48.png" />
-    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
-    <link rel="icon" type="image/svg+xml" href="/symbol.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MemorySmith Home</title>
+  <meta name="description" content="MemorySmith: cadernos em Markdown que ensinam a sua IA a escrever do seu jeito, no lugar certo.">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" type="image/png" sizes="192x192" href="/symbol-192.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/symbol-48.png">
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/svg+xml" href="/symbol.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<a class="skip" href="#top">Pular para o conteúdo</a>
+<canvas id="bg" aria-hidden="true"></canvas>
+<header class="nav">
+  <div class="wrap">
+    <a href="#top" aria-label="MemorySmith, início"><img src="/src/assets/logo.svg" alt="MemorySmith"></a>
+    <ul>
+      <li><a href="#lembra">Produto</a></li>
+      <li><a href="#para-quem">Para quem</a></li>
+      <li><a href="#modelos">Modelos</a></li>
+      <li><a href="#faq">Ajuda</a></li>
+    </ul>
+    <div class="end">
+      <a href="https://memorysmith.app" class="btn btn-line">Entrar</a>
+    </div>
+  </div>
+</header>
+
+<main id="top" tabindex="-1">
+  <section class="hero" id="hero">
+    <div class="wrap">
+      <h1 class="claim">Sua IA, finalmente <span class="grad">organizada</span>.</h1>
+      <p class="sub">Ensine uma vez como você trabalha. Ela escreve do seu jeito, no lugar certo, para sempre.</p>
+      <div class="with"><span>Funciona dentro de</span><b>Claude</b><b>ChatGPT</b><b>Grok</b><b>qualquer cliente MCP</b></div>
+
+      <div class="shot" id="h-shot" role="group" aria-roledescription="demonstração" aria-label="Tela do MemorySmith: três momentos de um dia com o caderno Projeto Atlas">
+        <div class="toast swap" id="h-toast"><i>✓</i><div><b id="h-tb">Claude escreveu em Decisões/</b><span id="h-ts">Decisão 14 · seguiu o modelo da pasta</span></div></div>
+        <div class="window">
+          <div class="bar"><i></i><i></i><i></i><span>memorysmith.app</span><span class="dots" id="h-dots"><button type="button" class="on" aria-label="Cena 1 de 3" aria-current="true"></button><button type="button" aria-label="Cena 2 de 3" aria-current="false"></button><button type="button" aria-label="Cena 3 de 3" aria-current="false"></button></span><button type="button" class="h-play" id="h-play" aria-label="Pausar a troca de cenas"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5l10 6.5-10 6.5z"/></svg></button></div>
+          <div class="app">
+            <div class="side" id="h-side">
+              <span class="nb">Projeto Atlas</span>
+              <div data-f="ent">Entrevistas <b>23</b></div>
+              <div data-f="hip">Hipóteses <b>9</b></div>
+              <div data-f="dec" class="on">Decisões <b>14</b></div>
+              <div data-f="reu">Reuniões <b>41</b></div>
+              <div data-f="tab">Tabelas <b>3</b></div>
+              <div data-f="pai">Painéis <b>2</b></div>
+            </div>
+            <div class="doc swap" id="h-doc">
+              <div class="meta"><span class="ok">aceita</span><span>17 nov 2026</span><span>infra</span><span>e-mail</span></div>
+              <h3>Decisão 14 · Fornecedor de e-mail</h3>
+              <h4>Por quê</h4>
+              <p>O fornecedor A não entregava no Outlook. Três clientes reclamaram na mesma semana, como registrado em <a>Reunião 2026-11-12</a>.</p>
+              <h4>O que decidimos</h4>
+              <p>Trocar para o fornecedor B até o fim do mês.</p>
+            </div>
+            <div class="chat swap" id="h-chat">
+              <small>Claude</small>
+              <div class="msg you">Registra que escolhemos o fornecedor B para os e-mails.</div>
+              <div class="msg ai">Li a Orientação do caderno: cada decisão ganha um número. <em>Registrei a Decisão 14 em Decisões/</em>, com o motivo e o link para a reunião.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment" id="capacidades">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Um caderno que faz de tudo</span>
+        <h2 class="claim-m">Funciona como os programas que você já usa. Só que você <span class="grad">pede</span>.</h2>
+        <p class="sub">Editor de textos, planilha, BI, gerenciador de projetos, drive. Tudo num caderno só, e cada coisa ligada às outras.</p>
+      </div>
+
+      <div class="cap-tabs" role="tablist" aria-label="Capacidades">
+        <button type="button" role="tab" data-cap="doc" aria-selected="true">Como um editor de textos</button>
+        <button type="button" role="tab" data-cap="sheet" aria-selected="false">Como uma planilha</button>
+        <button type="button" role="tab" data-cap="dash" aria-selected="false">Como um BI</button>
+        <button type="button" role="tab" data-cap="proj" aria-selected="false">Como um gestor de projetos</button>
+        <button type="button" role="tab" data-cap="file" aria-selected="false">Como um drive</button>
+        <button type="button" role="tab" data-cap="find" aria-selected="false">Como um buscador</button>
+      </div>
+
+      <!-- DOCUMENTS -->
+      <div class="cap" data-pane="doc">
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“Transforma a reunião de hoje numa ata, com as tarefas de cada um, e gera o PDF.”</div>
+          <h3>Como um editor de textos. Sem formatar nada.</h3>
+          <ul class="ticks">
+            <li>Títulos, tabelas, listas de tarefas e caixas de destaque</li>
+            <li>Impressão e PDF de qualquer nota</li>
+            <li>Cada versão guardada, com quem escreveu</li>
+            <li>Modelos que deixam todo documento no mesmo padrão</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="paperdoc">
+            <div class="pd-top"><span>Reuniões / Ata 2026-11-17</span><span class="pd-btn">⤓ PDF</span></div>
+            <h4>Ata · Planejamento do lançamento</h4>
+            <p class="pd-meta">17 nov 2026 · Ana, Bruno, Carla · 45 min</p>
+            <div class="pd-call"><b>Decisão</b> Lançamento confirmado para 2 de dezembro, com a campanha começando uma semana antes.</div>
+            <h5>Tarefas</h5>
+            <table class="pd-table">
+              <thead><tr><th>Tarefa</th><th>Responsável</th><th>Prazo</th></tr></thead>
+              <tbody>
+                <tr><td>Fechar o texto da campanha</td><td>Ana</td><td>21 nov</td></tr>
+                <tr><td>Testar os e-mails no Outlook</td><td>Bruno</td><td>24 nov</td></tr>
+                <tr><td>Treinar o time de suporte</td><td>Carla</td><td>28 nov</td></tr>
+              </tbody>
+            </table>
+            <h5>Próximos passos</h5>
+            <ul class="pd-check"><li class="ok">Aprovar orçamento de mídia</li><li>Revisar a página de preços</li><li>Agendar a reunião de go/no-go</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPREADSHEETS -->
+      <div class="cap" data-pane="sheet" hidden>
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“Importa esta planilha de vendas e me mostra as 5 maiores do Sul.”</div>
+          <h3>Como uma planilha. Sem escrever fórmula.</h3>
+          <ul class="ticks">
+            <li>Importa CSV e Excel, inclusive no formato brasileiro</li>
+            <li>Filtros, ordenação e somas pedidos em português</li>
+            <li>Linhas inseridas e corrigidas direto pela conversa</li>
+            <li>Confere o arquivo inteiro antes de gravar qualquer linha</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="grid-ui">
+            <div class="gu-top"><b>Vendas 2026</b><span class="chip-f">região = Sul</span><span class="chip-f">ordem: valor ↓</span><span class="gu-src">vendas.xlsx</span></div>
+            <div class="gu-scroll">
+              <table class="gu">
+                <thead><tr><th class="n">#</th><th>Cliente</th><th>Região</th><th>Data</th><th class="r">Valor</th><th>Etapa</th></tr></thead>
+                <tbody>
+                  <tr><td class="n">1</td><td>Loja Norte</td><td>Sul</td><td>03/11/2026</td><td class="r">R$ 48.900</td><td><span class="st s3">Fechado</span></td></tr>
+                  <tr><td class="n">2</td><td>Grupo Vale</td><td>Sul</td><td>28/10/2026</td><td class="r">R$ 41.200</td><td><span class="st s3">Fechado</span></td></tr>
+                  <tr><td class="n">3</td><td>Atacado Rio</td><td>Sul</td><td>12/11/2026</td><td class="r">R$ 36.750</td><td><span class="st s2">Negociação</span></td></tr>
+                  <tr><td class="n">4</td><td>Casa Bela</td><td>Sul</td><td>09/11/2026</td><td class="r">R$ 29.300</td><td><span class="st s2">Negociação</span></td></tr>
+                  <tr><td class="n">5</td><td>Ferragens Sol</td><td>Sul</td><td>15/11/2026</td><td class="r">R$ 22.480</td><td><span class="st s1">Proposta</span></td></tr>
+                </tbody>
+                <tfoot><tr><td></td><td colspan="3">5 de 212 linhas</td><td class="r">R$ 178.630</td><td></td></tr></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARDS -->
+      <div class="cap" data-pane="dash" hidden>
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“Monta um painel de vendas do trimestre, por mês e por região.”</div>
+          <h3>Como um BI. Sem montar gráfico.</h3>
+          <ul class="ticks">
+            <li>Indicadores, barras, linhas, pizza, funil, cascata, mapa de calor, velocímetro e mais</li>
+            <li>Clique num gráfico e o painel inteiro filtra junto</li>
+            <li>Filtros de período e atualização automática</li>
+            <li>Baixe o painel como imagem, do jeito que você vê</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="dash-ui">
+            <div class="kpis">
+              <div><span>Receita</span><b>R$ 482 mil</b><em class="up">▲ 12%</em></div>
+              <div><span>Ticket médio</span><b>R$ 1.270</b><em class="up">▲ 4%</em></div>
+              <div><span>Novos clientes</span><b>38</b><em class="dn">▼ 3</em></div>
+            </div>
+            <div class="charts">
+              <div class="chart">
+                <span class="ct">Receita por mês</span>
+                <svg viewBox="0 0 260 130" role="img" aria-label="Barras de receita de setembro a novembro, crescendo">
+                  <line x1="10" y1="110" x2="250" y2="110" stroke="#1f2c47"/>
+                  <g fill="#4c8dff"><rect x="28" y="56" width="40" height="54" rx="4"/><rect x="108" y="40" width="40" height="70" rx="4"/></g>
+                  <rect x="188" y="18" width="40" height="92" rx="4" fill="#ff9a45"/>
+                  <g fill="#a3adc2" font-size="10" font-family="Inter, sans-serif" text-anchor="middle"><text x="48" y="124">set</text><text x="128" y="124">out</text><text x="208" y="124">nov</text></g>
+                  <g fill="#edefec" font-size="10" font-family="Inter, sans-serif" text-anchor="middle"><text x="48" y="50">138</text><text x="128" y="34">162</text><text x="208" y="12">182</text></g>
+                </svg>
+              </div>
+              <div class="chart">
+                <span class="ct">Por região</span>
+                <svg viewBox="0 0 130 130" role="img" aria-label="Rosca: Sul 45%, Sudeste 35%, outras 20%">
+                  <circle cx="65" cy="62" r="40" fill="none" stroke="#1f2c47" stroke-width="18"/>
+                  <circle cx="65" cy="62" r="40" fill="none" stroke="#4c8dff" stroke-width="18" stroke-dasharray="113 138" transform="rotate(-90 65 62)"/>
+                  <circle cx="65" cy="62" r="40" fill="none" stroke="#ff9a45" stroke-width="18" stroke-dasharray="88 163" stroke-dashoffset="-113" transform="rotate(-90 65 62)"/>
+                  <circle cx="65" cy="62" r="40" fill="none" stroke="#34c97a" stroke-width="18" stroke-dasharray="50 201" stroke-dashoffset="-201" transform="rotate(-90 65 62)"/>
+                  <text x="65" y="66" fill="#edefec" font-size="13" font-weight="600" font-family="Space Grotesk, sans-serif" text-anchor="middle">Sul 45%</text>
+                </svg>
+              </div>
+              <div class="chart wide">
+                <span class="ct">Funil</span>
+                <div class="funnel"><i style="--w:100%">Lead 120</i><i style="--w:72%">Proposta 54</i><i style="--w:56%">Negociação 41</i><i style="--w:44%" class="hot">Fechado 38</i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="cap" data-pane="proj" hidden>
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“Organiza o lançamento num cronograma e num quadro de tarefas.”</div>
+          <h3>Como um gestor de projetos. Sem arrastar cartão.</h3>
+          <ul class="ticks">
+            <li>Gantt e Kanban montados a partir de uma tabela</li>
+            <li>Estrutura de entregas com o progresso somado das partes</li>
+            <li>Linha do tempo e calendário dos eventos</li>
+            <li>A IA move as tarefas quando você conta o que mudou</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="proj-ui">
+            <div class="gantt">
+              <div class="gh"><span></span><span>18 nov</span><span>25 nov</span><span>2 dez</span></div>
+              <div class="gr"><span>Campanha</span><i style="--s:0;--e:55%;--c:#4c8dff"></i></div>
+              <div class="gr"><span>E-mails</span><i style="--s:20%;--e:60%;--c:#4c8dff"></i></div>
+              <div class="gr"><span>Suporte</span><i style="--s:40%;--e:80%;--c:#34c97a"></i></div>
+              <div class="gr"><span>Lançamento</span><i class="ms" style="--s:92%;--e:96%;--c:#ff9a45"></i></div>
+            </div>
+            <div class="kanban">
+              <div><span class="kh">A fazer</span><p>Página de preços</p><p>Go/no-go</p></div>
+              <div><span class="kh">Fazendo</span><p class="hot">Texto da campanha</p><p>Teste no Outlook</p></div>
+              <div><span class="kh">Feito</span><p class="done">Orçamento de mídia</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILES -->
+      <div class="cap" data-pane="file" hidden>
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“Guarda as fotos da obra, o áudio da visita e o contrato na nota de hoje.”</div>
+          <h3>Como um drive. Sem procurar pasta.</h3>
+          <ul class="ticks">
+            <li>Arquivos guardados no tamanho original</li>
+            <li>Embutidos na nota pelo nome, onde fazem sentido</li>
+            <li>A IA envia, lê e organiza os anexos</li>
+            <li>Tudo vai junto quando você exporta o caderno</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="files-ui">
+            <div class="fn-head"><b>Visita à obra · 17 nov</b><span>4 arquivos</span></div>
+            <div class="tiles">
+              <div class="tile img i1"><span>fachada.jpg · 4,2 MB</span></div>
+              <div class="tile img i2"><span>cozinha.jpg · 3,8 MB</span></div>
+              <div class="tile pdf"><b>PDF</b><span>contrato-reforma.pdf · 1,1 MB</span></div>
+              <div class="tile aud"><div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>visita.m4a · 6:12</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="cap" data-pane="find" hidden>
+        <div class="cap-copy">
+          <div class="prompt"><span>Você pede</span>“O que a gente já decidiu sobre preço?”</div>
+          <h3>Como um buscador. Só que do que você sabe.</h3>
+          <ul class="ticks">
+            <li>Busca por texto, por pasta e pelas propriedades de cada nota</li>
+            <li>Grafo dos links entre as notas</li>
+            <li>Notas relacionadas e quem aponta para cada uma</li>
+            <li>A IA responde citando as notas de onde tirou</li>
+          </ul>
+        </div>
+        <div class="cap-shot">
+          <div class="find-ui">
+            <div class="fsearch">⌕ <span>preço</span><em>3 notas</em></div>
+            <div class="fres"><b>Decisão 13 · Cobrança anual</b><span>Decisões/ · “…anual com 20% de desconto sobre o <mark>preço</mark> mensal…”</span></div>
+            <div class="fres"><b>Reunião 2026-10-30</b><span>Reuniões/ · “…testar dois <mark>preços</mark> na página…”</span></div>
+            <div class="fres"><b>Entrevista Carla, Loja Norte</b><span>Entrevistas/ · “…acha o <mark>preço</mark> justo se tiver suporte…”</span></div>
+            <svg class="mini-graph" viewBox="0 0 300 90" aria-hidden="true">
+              <g stroke="#1f2c47" stroke-width="1.5"><line x1="40" y1="45" x2="120" y2="25"/><line x1="40" y1="45" x2="120" y2="68"/><line x1="120" y1="25" x2="200" y2="45"/><line x1="120" y1="68" x2="200" y2="45"/><line x1="200" y1="45" x2="270" y2="22"/><line x1="200" y1="45" x2="270" y2="70"/></g>
+              <circle cx="40" cy="45" r="7" fill="#4c8dff"/><circle cx="120" cy="25" r="6" fill="#4c8dff"/><circle cx="120" cy="68" r="6" fill="#34c97a"/><circle cx="200" cy="45" r="9" fill="#ff9a45"/><circle cx="270" cy="22" r="5" fill="#4c8dff"/><circle cx="270" cy="70" r="5" fill="#4c8dff"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<section class="moment paper" id="lembra">
+    <div class="wrap split">
+      <div class="copy">
+        <span class="kicker">Orientação</span>
+        <h2 class="claim-m">Você explica uma vez. Ela <span class="grad">lembra</span>.</h2>
+        <p class="sub">Escreva as regras do caderno num só lugar. Toda conversa, em qualquer IA, começa por elas. Chega de repetir o mesmo pedido.</p>
+      </div>
+      <div class="guide">
+        <span class="lab">Orientação · Projeto Atlas</span>
+        <h3>Como este caderno é escrito</h3>
+        <ul>
+          <li>Cada decisão ganha um número e explica o porquê e as outras opções que pensamos.</li>
+          <li>Entrevista leva o nome da pessoa e a data no título.</li>
+          <li>Frases curtas. Sempre em português.</li>
+          <li>Ligue cada nota às reuniões de onde ela veio.</li>
+        </ul>
+        <div class="foot"><span>Lida pelo Claude</span><span>Lida pelo ChatGPT</span><span>Lida pelo Grok</span><span>Vale em toda conversa</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment">
+    <div class="wrap split flip">
+      <div class="copy">
+        <span class="kicker">Pastas que se descrevem</span>
+        <h2 class="claim-m">Tudo no lugar certo. Sem você <span class="grad">pedir</span>.</h2>
+        <p class="sub">Cada pasta diz o que guarda. Você fala do jeito que fala, e a IA sabe exatamente onde cada coisa vai.</p>
+      </div>
+      <div class="route" role="img" aria-label="Quatro pedidos em linguagem natural, cada um indo para a pasta certa">
+        <div class="row"><div class="ask">“Conversei com a Carla, da Loja Norte, hoje.”</div><div class="arrow"></div><div class="dest d2">Entrevistas/<small>2026-11-17 Carla</small></div></div>
+        <div class="row"><div class="ask">“Fechamos com o fornecedor B.”</div><div class="arrow"></div><div class="dest d1">Decisões/<small>Decisão 14</small></div></div>
+        <div class="row"><div class="ask">“Acho que um onboarding guiado resolve.”</div><div class="arrow"></div><div class="dest d3">Hipóteses/<small>Onboarding guiado</small></div></div>
+        <div class="row"><div class="ask">“Atualiza o pipeline com esta planilha.”</div><div class="arrow"></div><div class="dest d4">Tabelas/<small>Pipeline · 212 linhas</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment white">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Modelos de pasta</span>
+        <h2 class="claim-m">Escrito do <span class="grad">seu</span> jeito. Toda vez.</h2>
+        <p class="sub">Cada pasta tem um modelo. A IA segue o modelo, e cem notas parecem escritas pela mesma mão.</p>
+      </div>
+      <div class="ba">
+        <div class="card bad">
+          <span class="tag">Sem MemorySmith</span>
+          <pre>aula hj sobre fotossintese
+luz + agua + co2 vira glicose
+prof falou q cai na prova??
+ver cap 4 depois</pre>
+        </div>
+        <div class="card good">
+          <span class="tag">Com MemorySmith</span>
+          <div class="note">
+            <h3>Aula 12 · Fotossíntese</h3>
+            <p class="meta"><span>Biologia</span><span>18 nov 2026</span></p>
+            <h4>Resumo</h4>
+            <p>Luz, água e gás carbônico viram glicose e oxigênio.</p>
+            <h4>Para revisar</h4>
+            <p>Capítulo 4 do livro. Cai na prova de sexta.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Trilha de mudanças</span>
+        <h2 class="claim-m">Você sabe quem escreveu <span class="grad">cada linha</span>.</h2>
+        <p class="sub">Pessoa, IA e horário, registrados em toda mudança. Confie no que a IA faz porque você vê o que ela fez.</p>
+      </div>
+      <div class="trail" role="img" aria-label="Exemplo de trilha: cada mudança mostra quem escreveu e por qual IA">
+        <div class="ev"><span class="av" style="background:var(--orange-l)">A</span><div><b>Ana registrou a decisão do fornecedor de e-mail</b><span>Decisões/ · há 2 minutos</span></div><span class="via c">via Claude</span></div>
+        <div class="ev"><span class="av" style="background:var(--blue-l)">B</span><div><b>Bruno registrou a entrevista com a Carla</b><span>Entrevistas/ · há 1 hora</span></div><span class="via g">via ChatGPT</span></div>
+        <div class="ev"><span class="av" style="background:var(--green-l)">A</span><div><b>Ana revisou Onboarding guiado</b><span>Hipóteses/ · hoje, 09:20</span></div><span class="via w">na web</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment paper" id="para-quem">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Para quem</span>
+        <h2 class="claim-m">Um caderno para cada <span class="grad">ambição</span>.</h2>
+        <p class="sub">Comece do zero ou de um modelo pronto da comunidade.</p>
+      </div>
+      <div class="uses">
+        <a class="use u1" href="#assinar"><h3>Quem cria produto</h3><div><p>Da primeira entrevista à decisão final, com tudo ligado.</p><div class="fold"><span>Entrevistas/</span><span>Decisões/</span></div></div></a>
+        <a class="use u2" href="#assinar"><h3>Quem pesquisa</h3><div><p>Fontes, fichamentos e hipóteses que viram texto.</p><div class="fold"><span>Fontes/</span><span>Fichamentos/</span></div></div></a>
+        <a class="use u3" href="#assinar"><h3>Quem lidera equipes</h3><div><p>Reuniões, 1:1 e metas em painéis que se atualizam.</p><div class="fold"><span>Reuniões/</span><span>Painéis/</span></div></div></a>
+        <a class="use u4" href="#assinar"><h3>Quem estuda</h3><div><p>Aulas, resumos e revisões que a IA organiza por você.</p><div class="fold"><span>Aulas/</span><span>Revisões/</span></div></div></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment" id="modelos">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Modelos da comunidade</span>
+        <h2 class="claim-m">Comece com um caderno <span class="grad">pronto</span>.</h2>
+        <p class="sub">Pastas, modelos de nota e Orientação já escritos por quem usa. Escolha um e adapte.</p>
+      </div>
+      <div class="carousel" id="carousel" role="region" aria-roledescription="carrossel" aria-label="Modelos de caderno">
+        <div class="car-view">
+          <div class="car-track" id="car-track">
+          <figure class="slide" role="group" aria-roledescription="slide" aria-label="1 de 4: Descoberta de produto">
+            <img src="/src/assets/img/modelo-produto.svg" alt="Caderno Projeto Atlas aberto na pasta Decisões, mostrando a Decisão 15 sobre o plano anual, com o porquê, o que foi decidido e links para a reunião e a entrevista de origem." width="960" height="540" draggable="false">
+            <figcaption><b>Descoberta de produto</b><span>Entrevistas, hipóteses e decisões ligadas, do primeiro contato à decisão final.</span></figcaption>
+          </figure>
+          <figure class="slide" role="group" aria-roledescription="slide" aria-label="2 de 4: Pesquisa acadêmica">
+            <img src="/src/assets/img/modelo-pesquisa.svg" alt="Caderno Tese de mestrado aberto num fichamento sobre as heurísticas de Nielsen, com citação, ideias-chave e um grafo de notas ligadas." width="960" height="540" draggable="false" loading="lazy">
+            <figcaption><b>Pesquisa acadêmica</b><span>Fontes, fichamentos e um grafo que mostra como cada ideia se liga às outras.</span></figcaption>
+          </figure>
+          <figure class="slide" role="group" aria-roledescription="slide" aria-label="3 de 4: Gestão de equipe">
+            <img src="/src/assets/img/modelo-equipe.svg" alt="Caderno Time de Produto aberto num painel de metas do trimestre: três indicadores e um gráfico de barras de entregas por mês, de junho a novembro." width="960" height="540" draggable="false" loading="lazy">
+            <figcaption><b>Gestão de equipe</b><span>Reuniões, 1:1 e metas em painéis que se atualizam sozinhos.</span></figcaption>
+          </figure>
+          <figure class="slide" role="group" aria-roledescription="slide" aria-label="4 de 4: Plano de estudos">
+            <img src="/src/assets/img/modelo-estudos.svg" alt="Caderno Plano de estudos aberto nas revisões da semana: uma faixa de dias com quarta-feira destacada e um quadro Kanban com as colunas A revisar, Revisando e Feito." width="960" height="540" draggable="false" loading="lazy">
+            <figcaption><b>Plano de estudos</b><span>Aulas, resumos e revisões organizados por semana e por matéria.</span></figcaption>
+          </figure>
+          </div>
+        </div>
+        <div class="car-ctrl">
+          <button type="button" class="car-btn" id="car-prev" aria-label="Slide anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <div class="car-dots" id="car-dots"></div>
+          <button type="button" class="car-btn" id="car-play" aria-label="Pausar a troca automática"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5l10 6.5-10 6.5z"/></svg></button>
+          <button type="button" class="car-btn" id="car-next" aria-label="Próximo slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <p class="sr" id="car-live" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment paper" id="seu">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">Seu, de verdade</span>
+        <h2 class="claim-m">No fim, é tudo Markdown. E é tudo <span class="grad">seu</span>.</h2>
+        <p class="sub">Sem prisão. Exporte quando quiser e leve tudo com você.</p>
+      </div>
+      <div class="yours">
+        <div><b>Markdown</b><span>Em formato aberto e publicado.</span></div>
+        <div><b>Exportação</b><span>O caderno inteiro, quando quiser.</span></div>
+        <div><b>Cofre isolado</b><span>Ninguém da plataforma lê o seu conteúdo.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment" id="conectar">
+    <div class="wrap split">
+      <div class="copy">
+        <span class="kicker">Conecte em 1 minuto</span>
+        <h2 class="claim-m">Um endereço. Sua IA <span class="grad">pronta</span>.</h2>
+        <p class="sub">Sem instalar nada. Cole o endereço no conector da sua IA, entre com a sua conta e pronto.</p>
+        <div class="url-box">
+          <code id="c-url">https://mcp.memorysmith.app/mcp</code>
+          <button type="button" class="btn btn-hot" id="c-copy">Copiar</button>
+        </div>
+      </div>
+      <div class="connect">
+        <div class="tabs" role="tablist" aria-label="Cliente de IA">
+          <button type="button" role="tab" data-c="claude" aria-selected="true">Claude</button>
+          <button type="button" role="tab" data-c="chatgpt" aria-selected="false">ChatGPT</button>
+          <button type="button" role="tab" data-c="grok" aria-selected="false">Grok</button>
+          <button type="button" role="tab" data-c="outro" aria-selected="false">Outros</button>
+        </div>
+        <ol class="csteps" id="c-steps"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment white" id="faq">
+    <div class="wrap faq-wrap">
+      <div class="copy">
+        <span class="kicker">Perguntas</span>
+        <h2 class="claim-m">Ainda em <span class="grad">dúvida</span>?</h2>
+      </div>
+      <div class="faq">
+        <div class="faq-tools">
+          <label class="faq-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <span class="sr">Pesquisar nas perguntas</span>
+            <input type="search" id="faq-q" placeholder="Pesquisar nas perguntas" autocomplete="off">
+          </label>
+          <div class="faq-tabs" role="group" aria-label="Filtrar perguntas por tema">
+            <button type="button" data-faq="all" aria-pressed="true">Todas</button>
+            <button type="button" data-faq="produto" aria-pressed="false">Produto</button>
+            <button type="button" data-faq="privacidade" aria-pressed="false">Privacidade</button>
+            <button type="button" data-faq="conta" aria-pressed="false">Conta</button>
+          </div>
+          <p class="faq-count" id="faq-count" aria-live="polite"></p>
+        </div>
+        <div id="faq-list">
+          <details data-cat="produto" open><summary>Preciso saber Markdown?</summary><p>Não. Você pede em linguagem natural e a IA escreve. Na web, você lê e edita cada nota direto na página.</p></details>
+          <details data-cat="produto"><summary>Funciona com qual IA?</summary><p>Com o Claude, com o ChatGPT, com o Grok e com qualquer cliente que fale MCP, o protocolo aberto de conectores para IA.</p></details>
+          <details data-cat="produto"><summary>O que é a Orientação?</summary><p>É a página de regras do caderno: como as notas são escritas, onde cada coisa vai e em que tom. Toda IA conectada lê a Orientação antes de escrever.</p></details>
+          <details data-cat="produto"><summary>Dá para usar planilhas e painéis?</summary><p>Dá. Você importa CSV ou Excel como tabela e pede painéis com indicadores, gráficos, Gantt e Kanban, que se atualizam junto com a tabela.</p></details>
+          <details data-cat="privacidade"><summary>Quem consegue ver o meu conteúdo?</summary><p>Só você e quem você convidar. Cada assinatura é isolada das outras, e nem a administração da plataforma alcança o seu conteúdo.</p></details>
+          <details data-cat="privacidade"><summary>Posso levar meus cadernos embora?</summary><p>Pode, quando quiser. A exportação leva o caderno inteiro, e tudo é Markdown, num formato publicado e aberto.</p></details>
+          <details data-cat="conta"><summary>Como faço para assinar?</summary><p>Pelo botão Assinar, no fim da página. Você cria a sua conta, conecta a sua IA e o primeiro caderno fica pronto em minutos.</p></details>
+          <details data-cat="conta"><summary>Como eu entro na minha conta?</summary><p>Pelo botão Entrar, no topo da página. A mesma conta vale na web e em todas as IAs conectadas.</p></details>
+        </div>
+        <p class="faq-empty" id="faq-empty" hidden>Nenhuma pergunta encontrada.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="final" id="assinar">
+    <div class="wrap">
+      <h2 class="claim">Dê memória à sua <span class="grad">IA</span>.</h2>
+      <p class="sub">Assine hoje. Seu primeiro caderno fica pronto em minutos.</p>
+      <a class="btn btn-hot" href="https://memorysmith.app">Assinar</a>
+    </div>
+  </section>
+</main>
+
+<footer id="footer">
+  <div class="wrap">
+    <img src="/src/assets/logo.svg" alt="MemorySmith">
+    <ul>
+      <li><a href="#faq">Ajuda</a></li>
+      <li><a href="https://memorysmith.app">Entrar</a></li>
+      <li><a href="#top">English</a></li>
+    </ul>
+    <span>© 2026 MemorySmith<span class="version" id="version"></span></span>
+  </div>
+</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/background.js"></script>
+  <script type="module" src="/src/version.ts"></script>
+</body>
 </html>

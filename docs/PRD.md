@@ -16,7 +16,7 @@ Claims carry their status when it is not obvious: *observed* (seen in this repos
 
 *Instruction: what the current version delivers, and what it deliberately does not.*
 
-The website is one page that says it is under construction, points at the product at `memorysmith.app`, and shows the version it serves. It answers at `www.memorysmith.app`. It does not present the product yet.
+The website is one page, in Brazilian Portuguese, that presents the product: what a notebook does, how the guidance and the folders steer the AI, the models, how to connect an AI client, and the frequent questions. Its sign-in and subscription calls lead to the product at `memorysmith.app`, and its footer shows the version it serves. It answers at `www.memorysmith.app`. It is dark only, and it has no theme toggle, no accessibility panel beyond what the browser and the operating system provide, no contact section and no sign-in page of its own.
 
 ## 4. Principles
 
@@ -46,4 +46,4 @@ Codes are append-only: never renumbered, never reused. A rule that stops holding
 
 *Instruction: how each rule is checked, by its code.*
 
-- **RN-SITE-001** Served with a `/config.json` that names a version, the page shows `Version` followed by it; while that file is read, or when it cannot be, the page shows no version. Checked by the tests of `memorysmithapp-site-frontend` and by opening the page production serves.
+- **RN-SITE-001** Served with a `/config.json` that names a version, the footer of the page shows `Versão` followed by it; while that file is read, or when it cannot be, the footer shows no version. Checked by the tests of `memorysmithapp-site-frontend` and by opening the page production serves.
