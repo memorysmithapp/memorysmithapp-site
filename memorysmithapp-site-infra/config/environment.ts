@@ -14,6 +14,11 @@ export interface SiteEnvironment {
   readonly name: 'production';
   readonly account: string;
   readonly region: string;
+  /** Where the website answers. */
+  readonly domainName: string;
+  /** The zone the name is written in: the application's, which the website writes a record of its own in. */
+  readonly hostedZoneName: string;
+  readonly hostedZoneId: string;
   /** `owner/name`: the one repository whose runs may deliver. */
   readonly repository: string;
   /** What the `sub` of its OIDC tokens starts with, ids included, as GitHub signs them. */
@@ -45,6 +50,9 @@ export function environmentOf(node: ContextReader): SiteEnvironment {
     name: 'production',
     account,
     region: text(raw['region'], 'production.region'),
+    domainName: text(raw['domainName'], 'production.domainName'),
+    hostedZoneName: text(raw['hostedZoneName'], 'production.hostedZoneName'),
+    hostedZoneId: text(raw['hostedZoneId'], 'production.hostedZoneId'),
     repository: text(node.tryGetContext('repository'), 'repository'),
     repositorySubject: text(node.tryGetContext('repositorySubject'), 'repositorySubject'),
   };

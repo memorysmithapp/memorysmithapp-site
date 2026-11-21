@@ -16,7 +16,7 @@ Claims carry their status when it is not obvious: *observed* (seen in this repos
 
 *Instruction: what the current version delivers, and what it deliberately does not.*
 
-The website is one page that says it is under construction, points at the product at `memorysmith.app`, and shows the version it serves. It does not present the product yet, and it does not answer at `www.memorysmith.app` yet (#4).
+The website is one page that says it is under construction, points at the product at `memorysmith.app`, and shows the version it serves. It answers at `www.memorysmith.app`. It does not present the product yet.
 
 ## 4. Principles
 

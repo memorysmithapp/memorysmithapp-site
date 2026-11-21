@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-20
+
+### Added
+
+- The website answers at `www.memorysmith.app`, with a certificate of its own and its `A` and `AAAA` records in the zone `memorysmith.app`, now that the application lets go of the name (#4).
+
 ## [0.1.0] - 2026-11-20
 
 ### Added
@@ -20,5 +26,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The workflow *Quality* also type-checks, tests and builds the website and its infrastructure (#8).
 - The repository adopts `memorysmithapp-template` v0.5.1: `AGENTS.md`, `README.md` and `package.json` name `memorysmithapp-site`; `docs/PRD.md` and `docs/ARCHITECTURE.md` keep their skeletons and the description of the parts kept; the version restarts at `0.1.0` and the changelog names this repository (#2).
 
-[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/memorysmithapp/memorysmithapp-site/releases/tag/v0.1.0

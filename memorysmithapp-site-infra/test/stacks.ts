@@ -25,7 +25,12 @@ export function synth(options: { context?: Record<string, string>; dist?: string
   const app = new App({ context: { ...cdk.context, ...options.context } });
   const environment = environmentOf(app.node);
   const env = { account: environment.account, region: environment.region };
-  const hosting = new SiteHostingStack(app, stackId('Hosting'), { env });
+  const hosting = new SiteHostingStack(app, stackId('Hosting'), {
+  env,
+  domainName: environment.domainName,
+  hostedZoneName: environment.hostedZoneName,
+  hostedZoneId: environment.hostedZoneId,
+});
   const release = new SiteReleaseStack(app, stackId('Release'), {
     env,
     bucket: hosting.bucket,
