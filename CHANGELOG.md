@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-22
+
 ### Fixed
 
 - `scripts/setup-repo.sh` creates the branch protection of `main` when it is absent, instead of dying on the 404 that says so: under `pipefail` the pipeline into `grep` took the exit status of `gh` and never saw the 404. It carries the fix of `memorysmithapp-template` v0.5.2 (#1).
@@ -40,7 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The workflow *Quality* also type-checks, tests and builds the website and its infrastructure (#8).
 - The repository adopts `memorysmithapp-template` v0.5.1: `AGENTS.md`, `README.md` and `package.json` name `memorysmithapp-site`; `docs/PRD.md` and `docs/ARCHITECTURE.md` keep their skeletons and the description of the parts kept; the version restarts at `0.1.0` and the changelog names this repository (#2).
 
-[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/memorysmithapp/memorysmithapp-site/releases/tag/v0.1.0
