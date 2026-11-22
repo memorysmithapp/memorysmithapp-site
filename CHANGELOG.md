@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `scripts/setup-repo.sh` creates the branch protection of `main` when it is absent, instead of dying on the 404 that says so: under `pipefail` the pipeline into `grep` took the exit status of `gh` and never saw the 404. It carries the fix of `memorysmithapp-template` v0.5.2 (#1).
+
 ## [0.3.0] - 2026-11-21
 
 ### Changed
