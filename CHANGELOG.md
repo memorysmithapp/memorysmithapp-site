@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `scripts/setup-repo.sh` gives the organization's team `contributors` write on the repository, as it does `maintainers`, and requires both teams to exist: without it a contributor fell back to the organization's base permission, read, and could not push a branch or create a milestone. It carries the fix of `memorysmithapp-template` v0.5.3 (#15).
+
 ## [0.3.1] - 2026-11-22
 
 ### Fixed

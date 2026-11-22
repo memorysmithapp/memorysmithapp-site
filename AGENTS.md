@@ -70,7 +70,7 @@ Each command with the directory it runs in, what it does, and the date somebody 
 
 | Command | Run in | What it does | Last verified |
 |---|---|---|---|
-| `scripts/setup-repo.sh <owner>/<repo> "<description>" <topic>[,<topic>...]` | The root | Applies the description, topics, merge options, wiki and discussions off, the ruleset `main`, write for the team `maintainers`, and the branch protection of `main`; idempotent | 2026-11-22, here, carrying the fix of memorysmithapp/memorysmithapp-template#46 (#1): nothing changed |
+| `scripts/setup-repo.sh <owner>/<repo> "<description>" <topic>[,<topic>...]` | The root | Applies the description, topics, merge options, wiki and discussions off, the ruleset `main`, write for the team `maintainers`, and the branch protection of `main`; idempotent | 2026-11-22, here, carrying the fix of memorysmithapp/memorysmithapp-template#46 (#1): nothing changed; the teams step of memorysmithapp/memorysmithapp-template#48 (#15), checked the same day by its own reads, finds `maintainers` and `contributors` with write |
 | `pnpm run quality` | The root | Runs the checks of the workflow *Quality* ([SDLC §8](docs/SDLC.md#8-tests-and-review)); exit 1 and the failing lines when one fails | 2026-11-20 |
 | `pnpm test` | The root | Runs the tests of the checks, each against a deliberate violation | 2026-11-20 |
 | `pnpm typecheck` | The root, after `pnpm install` | Type-checks both packages | 2026-11-20 |
