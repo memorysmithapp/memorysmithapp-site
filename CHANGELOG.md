@@ -6,15 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Fixed
-
-- `scripts/setup-repo.sh` gives the organization's team `contributors` write on the repository, as it does `maintainers`, and requires both teams to exist: without it a contributor fell back to the organization's base permission, read, and could not push a branch or create a milestone. It carries the fix of `memorysmithapp-template` v0.5.3 (#15).
-
 ## [0.3.1] - 2026-11-22
 
 ### Fixed
 
 - `scripts/setup-repo.sh` creates the branch protection of `main` when it is absent, instead of dying on the 404 that says so: under `pipefail` the pipeline into `grep` took the exit status of `gh` and never saw the 404. It carries the fix of `memorysmithapp-template` v0.5.2 (#1).
+- `scripts/setup-repo.sh` gives the organization's team `contributors` write on the repository, as it does `maintainers`, and requires both teams to exist: without it a contributor fell back to the organization's base permission, read, and could not push a branch or create a milestone. It carries the fix of `memorysmithapp-template` v0.5.3 (#15).
 
 ## [0.3.0] - 2026-11-21
 
