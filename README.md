@@ -32,7 +32,7 @@ pnpm -C memorysmithapp-site-infra synth
 
 ## Repository settings
 
-The settings a copy of the files does not carry — description, topics, merge options, wiki and discussions off, the ruleset `main` that protects the default branch, write for the organisation's team `maintainers`, and the branch protection that lets only that team merge to `main` — are applied by a script, with `gh` authenticated as an administrator and [`jq`](https://jqlang.org/) installed. It was run with:
+The settings a copy of the files does not carry — description, topics, merge options, wiki and discussions off, the ruleset `main` that protects the default branch, write for the organisation's teams `maintainers` and `contributors`, and the branch protection that lets only `maintainers` merge to `main` — are applied by a script, with `gh` authenticated as an administrator and [`jq`](https://jqlang.org/) installed. It was run with:
 
 ```sh
 scripts/setup-repo.sh memorysmithapp/memorysmithapp-site \
