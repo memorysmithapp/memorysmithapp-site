@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - On a phone, the 3D background's symbol is sharp: it is drawn at the screen's real density, up to 3x, instead of a 2x canvas the browser stretched, and its particles have a crisper edge, with their brightness lowered to match; the desktop does not change (#21).
 - On a phone, the 3D background no longer stalls the page after a fast scroll: its canvas follows the large viewport and is resized only when its size really changes, not when the address bar shows or hides, the page's height is kept instead of read on every frame, and a phone draws without MSAA at 30 frames per second, with the easing computed from time so the symbol keeps its pace; the desktop does not change (#25).
 
+### Fixed
+
+- On a desktop, the 3D background no longer stalls the page: a window being resized rebuilt its 2x drawing buffer on every frame, in stalls of 50 to 130 ms, and it is now rebuilt once the resize has settled; the symbol is built and the background starts once the page has loaded and the browser is idle, with its shaders compiled before the first frame, which cut the longest task at a first load from about 500 ms to under 100 ms; and no screen draws it with MSAA, which cost the GPU and changed nothing in the particles' soft edges (#22).
+
 ## [0.3.1] - 2026-11-22
 
 ### Fixed

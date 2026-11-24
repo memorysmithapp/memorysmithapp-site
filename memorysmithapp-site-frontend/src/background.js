@@ -6,11 +6,11 @@
   if (!window.THREE || !canvas) return;
   var renderer;
   /* A phone draws at the screen's real density, up to 3x: capped at 2x, the
-     browser stretched the canvas and blurred the symbol. It goes without
-     MSAA, which is expensive on a full-screen canvas and does nothing for
-     round particles. The desktop does not change. */
+     browser stretched the canvas and blurred the symbol. No screen gets MSAA:
+     on a full-screen canvas it is expensive, and the particles' soft round
+     edges look the same without it. */
   var phoneGPU = window.innerWidth < 720;
-  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !phoneGPU, alpha: true }); } catch (e) { return; }
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true }); } catch (e) { return; }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phoneGPU ? 3 : 2));
   renderer.setClearColor(0x000000, 0);
 
@@ -58,7 +58,7 @@
       'void main(){ float a = smoothstep(0.5, 0.5 - uSoft, length(gl_PointCoord - 0.5)); gl_FragColor = vec4(vC, a * vA * uAlpha); }'].join('\n')
   });
   var logoReady = false;
-  (function buildLogo() {
+  function buildLogo() {
     var img = new Image();
     img.onload = function () {
       var W = 420, H = Math.round(W * img.height / img.width);
@@ -83,11 +83,23 @@
       lg2.setAttribute('scatter', new THREE.Float32BufferAttribute(S, 3));
       lg2.setAttribute('seed', new THREE.Float32BufferAttribute(E, 1));
       logo.add(new THREE.Points(lg2, lmat));
-      logoReady = true; fit();
-      if (reduce) frame(performance.now());
+      fit();
+      // Shaders compiled before the first frame, so no frame waits on them.
+      renderer.compile(scene, camera);
+      logoReady = true; last = performance.now();
+      if (reduce) frame(last); else loop();
     };
     img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjcyIiB2aWV3Qm94PSIwIDAgMTAwIDcyIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8ZyBpZD0iMDMgJiMyMjY7JiMxMjg7JiMxNDg7IFZhcmlhJiMxOTU7JiMxNjc7JiMxOTU7JiMxODE7ZXMgZG8gcyYjMTk1OyYjMTczO21ib2xvIj4KPGcgaWQ9IlRpbGUgJiMxOTQ7JiMxODM7IENvciBlc2N1cm8iPgo8ZyBpZD0iUyYjMTk1OyYjMTczO21ib2xvIC8gQ29yIGVzY3VybyI+CjxnIGlkPSJDJiMxOTU7JiMxNjk7cmVicm8iPgo8ZyBpZD0iR3JvdXAiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNNDkuOTU1MiAyOC4wNDdDNTAuMDA2MiAyNi42MjM4IDUwLjA3MTMgMjYuNDM1OCA1MC4zMzE1IDI1LjExODlDNTAuNjM1NyAyMy41NzMxIDUyLjQ2OTcgMjAuODE2OSA1Mi4wMTYxIDE5LjY1MTFDNTAuODg3MiAxOC43IDQ4LjU1MDYgMTguODY2MiA0Ny4wNjcgMTguNTQxOUMzOS4wOTk0IDE2LjgwMDcgNDAuMiA1LjExMjQyIDQ4LjE1ODMgNC41MjU1OEM1MS42MDI5IDQuMjQwNDcgNTMuOTE4OCA2LjM3ODgyIDU1LjgyNjYgOC45MzA4MkM1Ny4wNTIzIDEwLjU2OTcgNTkuMDQ5OSA5LjI0Nzc3IDU5LjkzNDMgOC4wMjgxQzYyLjg2NTYgMy45ODk0NiA2OS4yODU3IDQuODUwODUgNjkuODc0OCAxMC4yMjVDNzAuMDI0MiAxMS42NzQ0IDY5LjU3OTMgMTMuMTIyMiA2OC42NDU2IDE0LjI0MDNDNjcuNzMxMiAxNS4zMzcgNjYuNDE1OSAxNi4wMjM4IDY0Ljk5MzMgMTYuMTQ4M0M2MC41NzI3IDE2LjU0NTEgNTkuNzg2NiAxMi4wNTM5IDU3LjU4NSAxMS43MjMxQzU3LjA2MSAxMS44MTQgNTYuNTcyMiAxMi4wNjM5IDU2LjMyOTUgMTIuNTMwNEM1NS41Mjk1IDE0LjA2OTcgNTMuNzc5OCAxNi45OTYxIDUzLjY0MDkgMTguNjEwMkM1My45ODIxIDE5LjU1NiA1NS4yNDYzIDE5LjI4MjEgNTYuMTYwNyAxOS4yOTJDNTguMTY1NCAxOS4zMTM0IDYwLjA3NjggMTkuMzk4MSA2MS44Mjk5IDIwLjUxMDRDNjQuMzU1IDIxLjc1MDcgNjYuMjEwMSAyNi4yODMyIDY0Ljk3OTMgMjguOTAxNkM2MS44MDM1IDM1LjY1NzEgNjEuNDQ0OCA0MC40MzY0IDY0LjY1NCA0Ny4zMjE3QzY3LjIwMzcgNTIuNzkzOCA3Mi45OTc3IDUzLjI0MjcgNzMuNzg1NCA1OS4yNDYxQzczLjg4OTMgNjAuMDM1MyA3My43MzggNjEuMDMzOCA3My41MDk0IDYxLjc3NDdDNzIuODgxNyA2My44MzQzIDcxLjQ2MDkgNjUuNTU5NyA2OS41NiA2Ni41NzA5QzY3LjcyMDYgNjcuNTQ3MSA2NS41NTc4IDY3LjcxODQgNjMuNTg2NiA2Ny4wNDQxQzU3LjEyMDggNjQuODk4IDYwLjM1NDYgNTguMzk4NiA1NC40NDggNTUuODY1M0M0OS40Mjc2IDUzLjcxMjggNDQuMjczIDYwLjE1NTkgNDEuMjkzOSA1My45MjgzQzQwLjc1MDkgNTIuODAxOCA0MC42OTE4IDUxLjUwMjUgNDEuMTMwNiA1MC4zMzE2QzQyLjA2ODUgNDcuODA3IDQ0LjgzODUgNDYuNDMwNSA0Ny4zOTc4IDQ3LjM3MTlDNDkuNTA1MSA0OC4xNzE0IDUwLjI3NyA1MC40MzU4IDUxLjU5NDEgNTIuMDMzOUM1My42MDkyIDU0LjQ3NzMgNTYuNzQ4MSA1Ni4wMDI2IDU5Ljg1NTIgNTQuNzIzMUM2MS4yNjAxIDU0LjI1NjggNjEuODU5OCA1Mi40ODI1IDYyLjAzNzQgNTEuMDg2OUM2Mi41Mzg1IDQ3LjEyMjggNjIuMDM5MiA0Mi45OTkxIDYwLjUzOTIgMzkuMjg0M0M1OS4yNjYyIDM2LjEzNDQgNTcuMjYxNSAzNC43MjA4IDU0LjA1NDEgMzMuOTYzNEM1MS4zMzkxIDMyLjAwOCA1MC45MzI5IDMxLjA5MzkgNDkuOTU1MiAyOC4wNDdaIiBmaWxsPSIjNEM4REZGIi8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTgyLjIzNDcgMTUuNDkzMUM4NC42NDkxIDE1LjM5ODUgODcuMDA1MyAxNi41MjA5IDg3LjgxNDIgMTguOTU0OEM4OC43MTk0IDIxLjY4MDUgODcuMTU4MyAyMy4zODYzIDg1LjkxODYgMjUuNjQ3NUM4NC43NTggMjcuMzU3NyA4NS44ODM0IDMwLjY2OTcgODcuNzIxIDMxLjYxNTVDOTIuMzk4MSAzNC4wMjI4IDk1LjY5NDEgMzYuNTM2OCA5My4xODU5IDQyLjMxOEM5Mi40NTEzIDQ0LjAxMjQgOTAuNzM2OCA0NC45NzY1IDg4Ljg5MDggNDUuNTYwN0M4Ny4xODk5IDQ1LjgxNDQgODUuNzA3NiA0NS42Mzg1IDg0LjE4NjUgNDQuNzg5OUM4Mi42ODQ4IDQzLjk2IDgxLjU3ODggNDIuNTY0NyA4MS4xMTI4IDQwLjkxNDdDODAuMDgyNCAzNy4yNTE1IDgyLjAyOSAzNS4zNjkyIDgzLjg3MTggMzIuNjY3NkM4NC40MDQ2IDMxLjg4NjUgODQuNTYxMSAzMC42MDggODQuNDcxNCAyOS42NTQzQzg0LjA0MjMgMjUuMTYzNSA3OS4xNjYyIDI1LjgxNCA3OC4wNjIgMjEuOTQ1NEM3Ny43MDY3IDIwLjcwMjUgNzcuOTI2NSAxOS4xMzM2IDc4LjU5ODMgMTguMDQxN0M3OS41ODY1IDE2LjQzOCA4MC41MDQ0IDE1LjkzNzUgODIuMjM0NyAxNS40OTMxWiIgZmlsbD0iIzRDOERGRiIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik02OC45OTkgMzIuODkyOEM3MC4wMTg5IDMyLjc5NTQgNzAuOTQzOCAzMi44MjQ4IDcxLjkzNTYgMzMuMTA3NkM3Ny40MzYgMzQuNjc3MyA3My41NDgxIDQwLjI5MjEgNzQuNTgwMyA0MS45MjJDNzUuMzY2MyA0My4xNjQxIDc3LjcxNzQgNDIuOTg1NCA3OS4wMTY4IDQzLjM0OTZDODAuMDM4NSA0My42MzY1IDgwLjk5ODYgNDQuMTg5NCA4MS40OTYyIDQ1LjE2ODJDODIuMDA5NyA0Ni4xNzkyIDgyLjEzMjggNDcuNzgyNCA4MS43ODEgNDguODU3QzgxLjMyOTIgNTAuMjMzMyA4MC4yMTYxIDUwLjk3MzQgNzguOTc0NiA1MS41Njk4QzczLjUyNTIgNTIuNzc5MSA3My4yODQzIDQ4LjM1NDMgNzMuMzMxOCA0NC42MTQxQzczLjM0NTkgNDMuNTg2MyA3Mi4yOTQ0IDQyLjc4NDEgNzEuMzA5NiA0Mi42NzU4QzY2Ljg4NTQgNDIuMTg5MiA2NC4xOTUgNDAuMTY3NiA2NS45MzI0IDM1LjQxODZDNjYuNDQwNSAzNC4wMjk4IDY3LjczMTIgMzMuMzc0OSA2OC45OTkgMzIuODkyOFoiIGZpbGw9IiM0QzhERkYiLz4KPHBhdGggaWQ9IlZlY3Rvcl80IiBkPSJNNzEuMDg2MSAxOS4wODI5QzczLjg0MzMgMTguNjQ2NyA3Ni40MzM1IDIwLjUxODEgNzYuODgzNyAyMy4yNzFDNzcuMzM1NiAyNi4wMjM4IDc1LjQ3NyAyOC42MjM1IDcyLjcyNSAyOS4wODlDNjkuOTUzNyAyOS41NTc5IDY3LjMzMDEgMjcuNjgzIDY2Ljg3NDcgMjQuOTA5NUM2Ni40MjEgMjIuMTM2MSA2OC4zMDk1IDE5LjUyMjQgNzEuMDg2MSAxOS4wODI5WiIgZmlsbD0iIzM0Qzk3QSIvPgo8cGF0aCBpZD0iVmVjdG9yXzUiIGQ9Ik03NC42MzQ3IDkuNzc2OUM3Ni4yMTczIDkuNDIxNDUgNzcuNzk2NCAxMC4zOTY5IDc4LjE4NSAxMS45NzI0Qzc4LjU3MzYgMTMuNTQ4IDc3LjYzMjggMTUuMTQ1NCA3Ni4wNjQzIDE1LjU2OEM3NS4wMjE2IDE1Ljg0OTIgNzMuOTA2NyAxNS41NDQyIDczLjE1MDYgMTQuNzcwMkM3Mi4zOTYyIDEzLjk5NjQgNzIuMTIwMSAxMi44NzQ4IDcyLjQyNzggMTEuODM4N0M3Mi43MzU2IDEwLjgwMjQgNzMuNTc5NiAxMC4wMTM2IDc0LjYzNDcgOS43NzY5WiIgZmlsbD0iIzM0Qzk3QSIvPgo8cGF0aCBpZD0iVmVjdG9yXzYiIGQ9Ik03OC41MDUgMjguMzYwMkM4MC4xMTQgMjguMDczNSA4MS42NTI2IDI5LjEzODYgODEuOTQ5OCAzMC43NDQ4QzgyLjI0NyAzMi4zNTEgODEuMTkxOSAzMy44OTU5IDc5LjU4NjUgMzQuMjAzMkM3Ny45NjY5IDM0LjUxMzUgNzYuNDA1NCAzMy40NDY1IDc2LjEwNDggMzEuODI1NkM3NS44MDQxIDMwLjIwNDggNzYuODgxOSAyOC42NDk3IDc4LjUwNSAyOC4zNjAyWiIgZmlsbD0iIzM0Qzk3QSIvPgo8cGF0aCBpZD0iVmVjdG9yXzciIGQ9Ik01NC4wNTQxIDMzLjk2MzRDNDkuMjEzNiAzMy43OTI1IDQyLjg0NDQgMzYuNTg3IDM5Ljc3MTIgNDAuMjM0NkMzNi44OTQ1IDQzLjY0ODggMzguODgxMyA0Ny40MDUgMzQuMTEwNyA1MC4wNzg0QzMyLjM0ODUgNTEuMDYzMiAzMC4yNjQ0IDUxLjI5ODggMjguMzI2OSA1MC43MzI0QzIzLjEwMDQgNDkuMjAxMyAyMS4zNDk1IDQzLjAyODEgMjQuMzU4MSAzOC43NjlDMjUuMDE4NSAzNy44MzM4IDI2LjM4MjIgMzYuMjM0NCAyNi42MTAxIDM1LjE3ODFDMjcuOTI0MSAyOS4wODg1IDIwLjA2OTQgMzAuNDEyNyAxNy41NzYgMjUuNDk1QzE2LjYxOTQgMjMuNjIxOSAxNi40NTk5IDIxLjQ0MjMgMTcuMTMzNyAxOS40NUMyMC41NTM3IDkuNDA2MzIgMzYuMzQyOCAxNS42Mjk1IDMwLjk4MyAyNS41Nzc2QzMwLjAyNzYgMjcuNDEyIDI3LjExMyAzMC41MjUyIDI4LjUxNDUgMzIuNjg5N0MzMy41NzQzIDQwLjUwNDUgNDcuNDQzOCAzNS44NDIgNDkuOTU1MiAyOC4wNDdDNTAuOTMyOCAzMS4wOTM5IDUxLjMzOTEgMzIuMDA4IDU0LjA1NDEgMzMuOTYzNFoiIGZpbGw9IiNGRjlBNDUiLz4KPHBhdGggaWQ9IlZlY3Rvcl84IiBkPSJNMzguOTMwMiAyMS4xNTA2QzQyLjE0MTMgMjAuNjI3MSA0NS4xNzIzIDIyLjc5NSA0NS43MTM0IDI2LjAwMjNDNDYuMjU0NSAyOS4yMDk2IDQ0LjEwMjUgMzIuMjUxNSA0MC44OTczIDMyLjgwOThDMzcuNjY3MSAzMy4zNzI1IDM0LjU5NTkgMzEuMjAwOCAzNC4wNTA2IDI3Ljk2ODdDMzMuNTA1MyAyNC43MzY2IDM1LjY5NDQgMjEuNjc4IDM4LjkzMDIgMjEuMTUwNloiIGZpbGw9IiNGRjlBNDUiLz4KPHBhdGggaWQ9IlZlY3Rvcl85IiBkPSJNNTEuODYzMSAzNi4xNDExQzU0LjQxNDYgMzUuNzE4NSA1Ni44MjU0IDM3LjQ0NTQgNTcuMjQ0IDM5Ljk5NjhDNTcuNjY0MiA0Mi41NDggNTUuOTMzOSA0NC45NTU3IDUzLjM4MjQgNDUuMzcyM0M1MC44MzI2IDQ1Ljc4ODIgNDguNDI5OCA0NC4wNjE5IDQ4LjAxMDcgNDEuNTE0OEM0Ny41OTE3IDM4Ljk2NzggNDkuMzE1NyAzNi41NjMgNTEuODYzMSAzNi4xNDExWiIgZmlsbD0iI0ZGOUE0NSIvPgo8cGF0aCBpZD0iVmVjdG9yXzEwIiBkPSJNMTcuNDA3IDMxLjIxNDdDMTguODE4NCAzMC44NDkyIDIwLjMxNzMgMzEuMjc0OCAyMS4zMjU2IDMyLjMyNzhDMjIuMzMzOCAzMy4zODA2IDIyLjY5NCAzNC44OTYxIDIyLjI2NyAzNi4yODk4QzIxLjg0MDMgMzcuNjgzNSAyMC42OTMxIDM4LjczNzcgMTkuMjY4IDM5LjA0NTlDMTcuMTI1NSAzOS41MDg5IDE1LjAwNjEgMzguMTczOCAxNC40OTk1IDM2LjA0MThDMTMuOTkyOSAzMy45MDk3IDE1LjI4NTIgMzEuNzY0NCAxNy40MDcgMzEuMjE0N1oiIGZpbGw9IiNGRjlBNDUiLz4KPHBhdGggaWQ9IlZlY3Rvcl8xMSIgZD0iTTkuMjc0MzYgMjQuNzAxN0MxMC42OTYxIDI0LjQzNTMgMTIuMTUxMiAyNC45NTQyIDEzLjA4MzEgMjYuMDYwMUMxNC4wMTUxIDI3LjE2NTkgMTQuMjc5NyAyOC42ODc1IDEzLjc3NTkgMzAuMDQzQzEzLjI3MiAzMS4zOTg0IDEyLjA3NzUgMzIuMzc3OSAxMC42NDkzIDMyLjYwNjhDOC40ODExMyAzMi45NTQzIDYuNDM2MDggMzEuNDk1NCA2LjA1OTk1IDI5LjMzMjZDNS42ODM4MiAyNy4xNjk3IDcuMTE2MDcgMjUuMTA2MyA5LjI3NDM2IDI0LjcwMTdaIiBmaWxsPSIjRkY5QTQ1Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMTIiIGQ9Ik0xMi43OTY1IDQzLjY2NjFDMTQuOTM5NSA0My4xNDgzIDE3LjA5NzMgNDQuNDYzIDE3LjYxOTQgNDYuNjA0NEMxOC4xNDE0IDQ4Ljc0NTkgMTYuODMwNyA1MC45MDU1IDE0LjY4OTYgNTEuNDMxN0MxMi41NDI2IDUxLjk1OTQgMTAuMzc1IDUwLjY0NDQgOS44NTE0OSA0OC40OTcyQzkuMzI3ODMgNDYuMzQ5NyAxMC42NDc0IDQ0LjE4NTIgMTIuNzk2NSA0My42NjYxWiIgZmlsbD0iI0ZGOUE0NSIvPgo8cGF0aCBpZD0iVmVjdG9yXzEzIiBkPSJNMzYuMDMyMiAxMi45MjAxQzM3LjY4MjMgMTIuNjcyNCAzOS4yMjU5IDEzLjc5NDkgMzkuNDk4IDE1LjQ0MDlDMzkuNzcgMTcuMDg2OCAzOC42Njk3IDE4LjY0NjIgMzcuMDI3NSAxOC45NDIzQzM1Ljk0MzQgMTkuMTM3OCAzNC44MzgzIDE4LjczNDQgMzQuMTM1MyAxNy44ODY3QzMzLjQzMjIgMTcuMDM4OSAzMy4yNDA0IDE1Ljg3ODQgMzMuNjMzMiAxNC44NDk3QzM0LjAyNjIgMTMuODIxIDM0Ljk0MjkgMTMuMDgzNSAzNi4wMzIyIDEyLjkyMDFaIiBmaWxsPSIjRkY5QTQ1Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMTQiIGQ9Ik04LjYyNTYxIDM2LjI5NDdDOS41MDU4OSAzNi4wMTQ2IDEwLjQ2OSAzNi4yMjkyIDExLjE0NjkgMzYuODU2NkMxMS44MjQ5IDM3LjQ4MzkgMTIuMTEzMyAzOC40MjczIDExLjkwMTcgMzkuMzI2M0MxMS42OTA0IDQwLjIyNTQgMTEuMDExNiA0MC45NDE0IDEwLjEyNSA0MS4yMDA5QzguNzc2MzEgNDEuNTk1NyA3LjM2MDc4IDQwLjgzMjQgNi45NTAwMSAzOS40ODg2QzYuNTM5NDIgMzguMTQ0OSA3LjI4NjQgMzYuNzIxIDguNjI1NjEgMzYuMjk0N1oiIGZpbGw9IiNGRjlBNDUiLz4KPC9nPgo8L2c+CjwvZz4KPC9nPgo8L2c+Cjwvc3ZnPgo=';
-  })();
+  }
+  /* The symbol is built and the background starts once the page has loaded
+     and the browser is idle: sampling the symbol and compiling the shaders
+     took over half a second, which stalled whoever scrolled or clicked as
+     the page appeared. */
+  function whenIdle(fn) {
+    var go = function () { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 1000 }); else setTimeout(fn, 200); };
+    if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+  }
+  whenIdle(buildLogo);
   /* The page's scrollable height, kept: reading scrollHeight on every frame
      can force the browser to lay the page out again in the middle of a scroll. */
   var maxScroll = 1, scrollTop = window.scrollY, viewH = window.innerHeight;
@@ -117,6 +129,7 @@
   dust.material.opacity = 0.5;
   if (motion && motion.addEventListener) motion.addEventListener('change', function () {
     reduce = motion.matches;
+    if (!logoReady) return;
     if (reduce) frame(performance.now()); else { last = performance.now(); loop(); }
   });
 
@@ -145,16 +158,18 @@
     lmat.uniforms.uSoft.value = phone ? 0.08 : 0.2;
   }
   fit();
-  var fitQueued = false;
+  /* The buffer is rebuilt once a resize has settled: rebuilding it on every
+     frame of a window being dragged stalled the page. Meanwhile the browser
+     stretches the canvas to its new size. */
+  var fitTimer = 0;
   window.addEventListener('resize', function () {
-    measure();
-    if (fitQueued) return; fitQueued = true;
-    requestAnimationFrame(function () { fitQueued = false; fit(); });
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(function () { measure(); fit(); }, 150);
   });
 
   var mx = 0, my = 0, sy = 0, sEase = 0;
   window.addEventListener('pointermove', function (ev) { mx = ev.clientX / window.innerWidth - 0.5; my = ev.clientY / window.innerHeight - 0.5; }, { passive: true });
-  window.addEventListener('scroll', function () { scrollTop = window.scrollY; sy = scrollTop / viewH; if (reduce) frame(performance.now()); }, { passive: true });
+  window.addEventListener('scroll', function () { scrollTop = window.scrollY; sy = scrollTop / viewH; if (reduce && logoReady) frame(performance.now()); }, { passive: true });
 
   var last = performance.now(), t0 = last, running = false;
   function frame(now) {
@@ -178,6 +193,5 @@
       requestAnimationFrame(tick);
     })(performance.now());
   }
-  document.addEventListener('visibilitychange', function () { if (!document.hidden && !reduce) { last = performance.now(); loop(); } });
-  if (reduce) frame(performance.now()); else loop();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !reduce && logoReady) { last = performance.now(); loop(); } });
 })();
