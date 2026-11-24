@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The website's two carousels have no pause button: the hero gains previous and next arrows beside its dots, the arrow keys and a swipe, the carousel of models carries its arrows over the edges of the image, which follows the finger or the mouse while dragged, and the first manual change stops the automatic rotation for good, which with the pause under the pointer or the focus and under less motion keeps WCAG 2.2.2 without the button (#23).
 - The website's hero has no floating card over the product screen: it repeated what the chat beside it shows and, on a phone, took room before the app window (#20).
 - On a phone, the 3D background's symbol is dimmer behind the hero's headline, which it competed with; the desktop does not change (#24).
+- On a phone, the 3D background's symbol is sharp: it is drawn at the screen's real density, up to 3x, instead of a 2x canvas the browser stretched, and its particles have a crisper edge, with their brightness lowered to match; the desktop does not change (#21).
 
 ## [0.3.1] - 2026-11-22
 

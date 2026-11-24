@@ -5,8 +5,11 @@
   var canvas = document.getElementById('bg');
   if (!window.THREE || !canvas) return;
   var renderer;
+  /* A phone draws at the screen's real density, up to 3x: capped at 2x, the
+     browser stretched the canvas and blurred the symbol. The desktop keeps 2x. */
+  var phoneGPU = window.innerWidth < 720;
   try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); } catch (e) { return; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phoneGPU ? 3 : 2));
   renderer.setClearColor(0x000000, 0);
 
   var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
@@ -37,7 +40,7 @@
   var logo = new THREE.Group(); scene.add(logo);
   var lmat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uTime: { value: 0 }, uDisperse: { value: 0 }, uPix: { value: renderer.getPixelRatio() }, uSize: { value: 1 }, uAlpha: { value: 1 } },
+    uniforms: { uTime: { value: 0 }, uDisperse: { value: 0 }, uPix: { value: renderer.getPixelRatio() }, uSize: { value: 1 }, uAlpha: { value: 1 }, uSoft: { value: 0.2 } },
     vertexShader: [
       'attribute vec3 scatter; attribute vec3 color; attribute float seed; uniform float uTime, uDisperse, uPix, uSize; varying vec3 vC; varying float vA;',
       'void main(){',
@@ -49,8 +52,8 @@
       '  gl_Position = projectionMatrix * mv; vC = color; vA = 0.7 + seed * 0.3;',
       '}'].join('\n'),
     fragmentShader: [
-      'uniform float uAlpha; varying vec3 vC; varying float vA;',
-      'void main(){ float a = smoothstep(0.5, 0.3, length(gl_PointCoord - 0.5)); gl_FragColor = vec4(vC, a * vA * uAlpha); }'].join('\n')
+      'uniform float uAlpha, uSoft; varying vec3 vC; varying float vA;',
+      'void main(){ float a = smoothstep(0.5, 0.5 - uSoft, length(gl_PointCoord - 0.5)); gl_FragColor = vec4(vC, a * vA * uAlpha); }'].join('\n')
   });
   var logoReady = false;
   (function buildLogo() {
@@ -117,8 +120,11 @@
     logo.position.y = phone ? visH * 0.27 : visH * 0.06;
     lmat.uniforms.uSize.value = w < 640 ? 1.3 : 1;
     // On a phone the symbol is smaller and its particles overlap more; with
-    // additive blending the light adds up and it glared. Dimmer only there.
-    lmat.uniforms.uAlpha.value = phone ? 0.25 : 1.5;
+    // additive blending the light adds up and it glared. Dimmer only there
+    // (0.19 makes up for the sharper edge below, which fills more of the dot).
+    lmat.uniforms.uAlpha.value = phone ? 0.19 : 1.5;
+    // A sharper particle edge on a phone, where the symbol is small.
+    lmat.uniforms.uSoft.value = phone ? 0.08 : 0.2;
   }
   fit();
   window.addEventListener('resize', fit);
