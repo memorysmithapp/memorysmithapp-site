@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-24
+
 ### Changed
 
 - `SDLC.md` and `AGENTS.md` §4 bring in three rules of `memorysmithapp-template` v0.5.3 and v0.5.4. Each repository stands on its own: a problem found in another repository is registered there, as one issue, with no sub-issues elsewhere, replacing the registration of a gap at its origin (§2). A cycle is planned from every open issue, reviewed with the owner before the work starts; leaving one out, or moving it to a later version, is the owner's decision with a reason (§2). Delivering is the owner's decision: running *Release* by hand on a tag, or a `cdk deploy`, needs the owner's go-ahead in the session, which a go-ahead to implement is not (§8) (#18).
@@ -52,7 +54,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The workflow *Quality* also type-checks, tests and builds the website and its infrastructure (#8).
 - The repository adopts `memorysmithapp-template` v0.5.1: `AGENTS.md`, `README.md` and `package.json` name `memorysmithapp-site`; `docs/PRD.md` and `docs/ARCHITECTURE.md` keep their skeletons and the description of the parts kept; the version restarts at `0.1.0` and the changelog names this repository (#2).
 
-[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...v0.2.0
