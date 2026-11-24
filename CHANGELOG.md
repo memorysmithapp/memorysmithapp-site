@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - `SDLC.md` and `AGENTS.md` §4 bring in three rules of `memorysmithapp-template` v0.5.3 and v0.5.4. Each repository stands on its own: a problem found in another repository is registered there, as one issue, with no sub-issues elsewhere, replacing the registration of a gap at its origin (§2). A cycle is planned from every open issue, reviewed with the owner before the work starts; leaving one out, or moving it to a later version, is the owner's decision with a reason (§2). Delivering is the owner's decision: running *Release* by hand on a tag, or a `cdk deploy`, needs the owner's go-ahead in the session, which a go-ahead to implement is not (§8) (#18).
+- The website's two carousels have no pause button: the hero gains previous and next arrows beside its dots, the arrow keys and a swipe, the carousel of models carries its arrows over the edges of the image, which follows the finger or the mouse while dragged, and the first manual change stops the automatic rotation for good, which with the pause under the pointer or the focus and under less motion keeps WCAG 2.2.2 without the button (#23).
 
 ## [0.3.1] - 2026-11-22
 

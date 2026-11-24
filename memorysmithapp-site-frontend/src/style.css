@@ -84,17 +84,16 @@ main, footer { position: relative; z-index: 1; }
 .swap { transition: opacity .45s ease, transform .45s ease; }
 .swap.out { opacity: 0; transform: translateY(6px); }
 .side div { transition: background .4s ease, color .4s ease; }
-.window .bar .dots { margin-left: auto; display: flex; gap: 6px; }
-.window .bar .dots { gap: 0; }
+.window .bar .h-nav { margin-left: auto; display: flex; align-items: center; }
+.window .bar .dots { display: flex; gap: 0; }
 .dots button { min-width: 24px; height: 24px; padding: 0 3px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
 .dots button::before { content: ""; width: 6px; height: 6px; border-radius: 3px; background: var(--night-line); transition: background .3s ease, width .3s ease; }
 .dots button:hover::before { background: var(--mist); }
 .dots button.on::before { background: var(--orange-l); width: 18px; }
-.h-play { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--mist); display: grid; place-items: center; cursor: pointer; margin-left: 2px; }
-.h-play:hover { color: var(--paper); }
-.h-play svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.h-play .i-play, .h-play.paused .i-pause { display: none; }
-.h-play.paused .i-play { display: block; fill: currentColor; }
+.h-arrow { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--mist); display: grid; place-items: center; cursor: pointer; transition: color .2s ease, background .2s ease; }
+.h-arrow:hover { color: var(--paper); background: var(--night-line); }
+.h-arrow svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.shot { touch-action: pan-y; }
 
 /* playground */
 .play { display: grid; gap: 20px; margin-top: clamp(48px, 7vw, 72px); }
@@ -453,8 +452,13 @@ main:focus { outline: none; }
    Carousel of models
    ===================================================================== */
 .carousel { max-width: 1000px; margin: clamp(48px, 7vw, 72px) auto 0; }
-.car-view { overflow: hidden; border-radius: 24px; border: 1px solid var(--night-line); background: var(--night-2); box-shadow: 0 40px 90px -30px rgba(0,0,0,.6); }
-.car-track { display: flex; transition: transform .6s cubic-bezier(.2,.7,.2,1); touch-action: pan-y; }
+.car-view { position: relative; container-type: inline-size; overflow: hidden; border-radius: 24px; border: 1px solid var(--night-line); background: var(--night-2); box-shadow: 0 40px 90px -30px rgba(0,0,0,.6); }
+.car-track { display: flex; transition: transform .6s cubic-bezier(.2,.7,.2,1); touch-action: pan-y; cursor: grab; }
+.car-track.dragging { transition: none; cursor: grabbing; user-select: none; }
+/* Arrows over the edges of the image, centered on its height (16:9). */
+.car-side { position: absolute; z-index: 2; top: calc(28.125cqw - 23px); background: rgba(11,18,32,.78); backdrop-filter: blur(6px); }
+#car-prev { left: 14px; }
+#car-next { right: 14px; }
 .slide { flex: 0 0 100%; min-width: 0; margin: 0; display: grid; }
 .slide img { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; background: #0b1220; user-select: none; }
 .slide figcaption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 20px; padding: 18px 24px; border-top: 1px solid var(--night-line); text-align: left; }
@@ -464,13 +468,11 @@ main:focus { outline: none; }
 .car-btn { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--night-line); background: var(--night-2); color: var(--paper); display: grid; place-items: center; cursor: pointer; transition: border-color .2s ease; }
 .car-btn:hover { border-color: var(--orange-l); }
 .car-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.car-btn .i-play, .car-btn.paused .i-pause { display: none; }
-.car-btn.paused .i-play { display: block; fill: currentColor; }
 .car-dots { display: flex; align-items: center; padding-inline: 6px; }
 .car-dots button { min-width: 24px; height: 24px; padding: 0 4px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
 .car-dots button::before { content: ""; width: 10px; height: 10px; border-radius: 5px; background: var(--night-line); transition: width .3s ease, background .3s ease; }
 .car-dots button[aria-current="true"]::before { width: 28px; background: var(--orange); }
-@media (max-width: 560px) { .slide figcaption { padding: 14px 16px; } .car-btn { width: 42px; height: 42px; } }
+@media (max-width: 560px) { .slide figcaption { padding: 14px 16px; } .car-btn { width: 42px; height: 42px; } .car-side { top: calc(28.125cqw - 21px); } #car-prev { left: 8px; } #car-next { right: 8px; } }
 
 /* =====================================================================
    Questions: search and tabs by topic

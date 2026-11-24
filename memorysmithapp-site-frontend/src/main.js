@@ -56,34 +56,42 @@
   }
   /* Less motion, asked for in the operating system, pauses every rotation; read on each tick, so a change applies at once. */
   function isReduced() { return !!(motion && motion.matches); }
-  /* A new scene every 14 s. It pauses under the pointer or the focus, with
-     the pause button (WCAG 2.2.2) and when less motion is asked for. The dots
-     pick a scene and restart the count. */
-  var heroPaused = false, heroOver = false, heroTimer;
-  function heroStart() {
-    clearInterval(heroTimer);
-    heroTimer = setInterval(function () {
-      if (heroPaused || heroOver || document.hidden || isReduced()) return;
-      cur = (cur + 1) % scenes.length; showScene(cur);
-    }, 14000);
+  /* A new scene every 14 s. It pauses under the pointer or the focus and when
+     less motion is asked for. The arrows, the dots, the arrow keys and a swipe
+     change the scene by hand, and the first manual change stops the rotation
+     for good (WCAG 2.2.2), with no pause button needed. */
+  var heroManual = false, heroOver = false;
+  var heroTimer = setInterval(function () {
+    if (heroManual || heroOver || document.hidden || isReduced()) return;
+    cur = (cur + 1) % scenes.length; showScene(cur);
+  }, 14000);
+  function heroGo(k) {
+    heroManual = true; clearInterval(heroTimer);
+    k = (k + scenes.length) % scenes.length;
+    if (k !== cur) { cur = k; showScene(cur); }
   }
-  heroStart();
-  var shot = $('h-shot'), heroPlay = $('h-play');
+  var shot = $('h-shot');
   shot.addEventListener('mouseenter', function () { heroOver = true; });
   shot.addEventListener('mouseleave', function () { heroOver = false; });
   shot.addEventListener('focusin', function () { heroOver = true; });
   shot.addEventListener('focusout', function (e) { if (!shot.contains(e.relatedTarget)) heroOver = false; });
   $('h-dots').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    var k = Array.prototype.indexOf.call(this.children, b);
-    if (k !== cur) { cur = k; showScene(cur); }
-    heroStart();
+    heroGo(Array.prototype.indexOf.call(this.children, b));
   });
-  heroPlay.addEventListener('click', function () {
-    heroPaused = !heroPaused;
-    heroPlay.classList.toggle('paused', heroPaused);
-    heroPlay.setAttribute('aria-label', heroPaused ? 'Retomar a troca de cenas' : 'Pausar a troca de cenas');
+  $('h-prev').addEventListener('click', function () { heroGo(cur - 1); });
+  $('h-next').addEventListener('click', function () { heroGo(cur + 1); });
+  shot.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { heroGo(cur - 1); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { heroGo(cur + 1); e.preventDefault(); }
   });
+  var hx0 = null, hy0 = 0;
+  shot.addEventListener('touchstart', function (e) { hx0 = e.touches[0].clientX; hy0 = e.touches[0].clientY; }, { passive: true });
+  shot.addEventListener('touchend', function (e) {
+    if (hx0 === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - hx0, dy = t.clientY - hy0; hx0 = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) heroGo(cur + (dx < 0 ? 1 : -1));
+  }, { passive: true });
 
   /* ---------- capabilities tabs ---------- */
   document.addEventListener("click", function (e) {
@@ -118,14 +126,15 @@
   });
 
   /* ---------- carousel of models ----------
-     Buttons, dots, the arrow keys and a swipe. It moves on by itself every
-     6 s, but pauses under the pointer or the focus, with the pause button
-     (WCAG 2.2.2) and when less motion is asked for. */
+     Arrows over the image, dots, the arrow keys and a drag with the finger or
+     the mouse, the image following it. It moves on by itself every 6 s,
+     pauses under the pointer or the focus and when less motion is asked for,
+     and the first manual change stops the rotation for good (WCAG 2.2.2). */
   (function () {
     var box = $('carousel');
     if (!box) return;
     var track = $('car-track'), slides = track.children, n = slides.length, i = 0;
-    var dots = $('car-dots'), play = $('car-play'), live = $('car-live'), paused = false, over = false;
+    var dots = $('car-dots'), live = $('car-live'), manual = false, over = false;
     for (var k = 0; k < n; k++) {
       var b = document.createElement('button');
       b.type = 'button'; b.dataset.go = k;
@@ -143,32 +152,42 @@
       }
       if (say) live.textContent = 'Slide ' + (i + 1) + ' de ' + n + ': ' + slides[i].querySelector('b').textContent;
     }
-    function setPaused(p) {
-      paused = p;
-      play.classList.toggle('paused', p);
-      play.setAttribute('aria-label', p ? 'Retomar a troca automática' : 'Pausar a troca automática');
-    }
-    setInterval(function () { if (!paused && !over && !document.hidden && !isReduced()) go(i + 1, false); }, 6000);
-    $('car-prev').addEventListener('click', function () { go(i - 1, true); });
-    $('car-next').addEventListener('click', function () { go(i + 1, true); });
-    play.addEventListener('click', function () { setPaused(!paused); });
-    dots.addEventListener('click', function (e) { var d = e.target.closest('[data-go]'); if (d) go(+d.dataset.go, true); });
+    var timer = setInterval(function () { if (!manual && !over && !document.hidden && !isReduced()) go(i + 1, false); }, 6000);
+    function pick(to) { manual = true; clearInterval(timer); go(to, true); }
+    $('car-prev').addEventListener('click', function () { pick(i - 1); });
+    $('car-next').addEventListener('click', function () { pick(i + 1); });
+    dots.addEventListener('click', function (e) { var d = e.target.closest('[data-go]'); if (d) pick(+d.dataset.go); });
     box.addEventListener('mouseenter', function () { over = true; });
     box.addEventListener('mouseleave', function () { over = false; });
     box.addEventListener('focusin', function () { over = true; });
     box.addEventListener('focusout', function (e) { if (!box.contains(e.relatedTarget)) over = false; });
     box.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') { go(i - 1, true); e.preventDefault(); }
-      else if (e.key === 'ArrowRight') { go(i + 1, true); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { pick(i - 1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight') { pick(i + 1); e.preventDefault(); }
     });
-    var x0 = null;
-    track.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
-    track.addEventListener('pointercancel', function () { x0 = null; });
-    track.addEventListener('pointerup', function (e) {
+    /* Drag: the track follows the finger or the mouse and, on release, moves
+       to the neighbouring slide if it travelled more than 1/6 of the width;
+       otherwise it goes back. */
+    var x0 = null, dx = 0;
+    track.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      x0 = e.clientX; dx = 0;
+      track.classList.add('dragging');
+      try { track.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    track.addEventListener('pointermove', function (e) {
       if (x0 === null) return;
-      var dx = e.clientX - x0; x0 = null;
-      if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1), true);
+      dx = e.clientX - x0;
+      track.style.transform = 'translateX(calc(' + (-100 * i) + '% + ' + dx + 'px))';
     });
+    function drop() {
+      if (x0 === null) return;
+      x0 = null; track.classList.remove('dragging');
+      if (Math.abs(dx) > track.offsetWidth / 6) pick(i + (dx < 0 ? 1 : -1));
+      else go(i, false);
+    }
+    track.addEventListener('pointerup', drop);
+    track.addEventListener('pointercancel', drop);
     go(0, false);
   })();
 
