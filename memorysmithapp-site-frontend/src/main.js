@@ -22,15 +22,15 @@
 
   /* ---------- hero: three moments of a real day ---------- */
   var scenes = [
-    { f: 'dec', n: 14, who: 'Claude', tb: 'Claude escreveu em Decisões/', ts: 'Decisão 14 · seguiu o modelo da pasta',
+    { f: 'dec', n: 14, who: 'Claude',
       doc: '<div class="meta"><span class="ok">aceita</span><span>17 nov 2026</span><span>infra</span><span>e-mail</span></div><h3>Decisão 14 · Fornecedor de e-mail</h3><h4>Por quê</h4><p>O fornecedor A não entregava no Outlook. Três clientes reclamaram na mesma semana, como registrado em <a>Reunião 2026-11-12</a>.</p><h4>O que decidimos</h4><p>Trocar para o fornecedor B até o fim do mês.</p>',
       you: 'Registra que escolhemos o fornecedor B para os e-mails.',
       ai: 'Li a Orientação do caderno: cada decisão ganha um número. <em>Registrei a Decisão 14 em Decisões/</em>, com o motivo e o link para a reunião.' },
-    { f: 'ent', n: 24, who: 'ChatGPT', tb: 'ChatGPT escreveu em Entrevistas/', ts: 'Carla · nome e data no título',
+    { f: 'ent', n: 24, who: 'ChatGPT',
       doc: '<div class="meta"><span class="ok">entrevista</span><span>17 nov 2026</span><span>varejo</span></div><h3>2026-11-17 · Carla, Loja Norte</h3><h4>O que ouvimos</h4><p>Fecha o caixa numa planilha todo fim de dia e perde quase uma hora com isso.</p><h4>Ligações</h4><p>Reforça a hipótese <a>Onboarding guiado</a>.</p>',
       you: 'Conversei com a Carla, da Loja Norte. Ela fecha o caixa numa planilha.',
       ai: 'Entrevistas levam o nome e a data no título. <em>Criei a nota em Entrevistas/</em> e liguei à hipótese que ela reforça.' },
-    { f: 'pai', n: 3, who: 'Grok', tb: 'Grok criou um painel', ts: 'Pipeline de vendas · funil e Kanban',
+    { f: 'pai', n: 3, who: 'Grok',
       doc: '<div class="meta"><span class="ok">painel</span><span>tabela Pipeline</span><span>212 linhas</span></div><h3>Pipeline de vendas</h3><h4>Funil</h4><p>Lead 120 · Proposta 54 · Negociação 41 · Fechado 38</p><h4>Kanban</h4><p>Cartões agrupados por etapa, atualizados junto com a tabela.</p>',
       you: 'Monta um painel do pipeline por etapa.',
       ai: 'Li a tabela Pipeline, com 212 linhas. <em>Criei o painel</em> com um funil e um Kanban por etapa.' }
@@ -38,12 +38,11 @@
   var base = { ent: 23, hip: 9, dec: 14, reu: 41, tab: 3, pai: 2 };
   var cur = 0;
   function showScene(i) {
-    var s = scenes[i], doc = $('h-doc'), chat = $('h-chat'), toast = $('h-toast');
-    [doc, chat, toast].forEach(function (el) { el.classList.add('out'); });
+    var s = scenes[i], doc = $('h-doc'), chat = $('h-chat');
+    [doc, chat].forEach(function (el) { el.classList.add('out'); });
     setTimeout(function () {
       doc.innerHTML = s.doc;
       chat.innerHTML = '<small>' + s.who + '</small><div class="msg you">' + s.you + '</div><div class="msg ai">' + s.ai + '</div>';
-      $('h-tb').textContent = s.tb; $('h-ts').textContent = s.ts;
       var rows = $('h-side').querySelectorAll('[data-f]');
       for (var k = 0; k < rows.length; k++) {
         var f = rows[k].dataset.f; rows[k].classList.toggle('on', f === s.f);
@@ -51,7 +50,7 @@
       }
       var dots = $('h-dots').children;
       for (var d = 0; d < dots.length; d++) { dots[d].classList.toggle('on', d === i); dots[d].setAttribute('aria-current', d === i ? 'true' : 'false'); }
-      [doc, chat, toast].forEach(function (el) { el.classList.remove('out'); });
+      [doc, chat].forEach(function (el) { el.classList.remove('out'); });
     }, 450);
   }
   /* Less motion, asked for in the operating system, pauses every rotation; read on each tick, so a change applies at once. */
