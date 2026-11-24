@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The website's hero has no floating card over the product screen: it repeated what the chat beside it shows and, on a phone, took room before the app window (#20).
 - On a phone, the 3D background's symbol is dimmer behind the hero's headline, which it competed with; the desktop does not change (#24).
 - On a phone, the 3D background's symbol is sharp: it is drawn at the screen's real density, up to 3x, instead of a 2x canvas the browser stretched, and its particles have a crisper edge, with their brightness lowered to match; the desktop does not change (#21).
+- On a phone, the 3D background no longer stalls the page after a fast scroll: its canvas follows the large viewport and is resized only when its size really changes, not when the address bar shows or hides, the page's height is kept instead of read on every frame, and a phone draws without MSAA at 30 frames per second, with the easing computed from time so the symbol keeps its pace; the desktop does not change (#25).
 
 ## [0.3.1] - 2026-11-22
 
