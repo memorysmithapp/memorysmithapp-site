@@ -6,9 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-24
+
 ### Changed
 
 - `SDLC.md` and `AGENTS.md` §4 bring in three rules of `memorysmithapp-template` v0.5.3 and v0.5.4. Each repository stands on its own: a problem found in another repository is registered there, as one issue, with no sub-issues elsewhere, replacing the registration of a gap at its origin (§2). A cycle is planned from every open issue, reviewed with the owner before the work starts; leaving one out, or moving it to a later version, is the owner's decision with a reason (§2). Delivering is the owner's decision: running *Release* by hand on a tag, or a `cdk deploy`, needs the owner's go-ahead in the session, which a go-ahead to implement is not (§8) (#18).
+- The website's two carousels have no pause button: the hero gains previous and next arrows beside its dots, the arrow keys and a swipe, the carousel of models carries its arrows over the edges of the image, which follows the finger or the mouse while dragged, and the first manual change stops the automatic rotation for good, which with the pause under the pointer or the focus and under less motion keeps WCAG 2.2.2 without the button (#23).
+- The website's hero has no floating card over the product screen: it repeated what the chat beside it shows and, on a phone, took room before the app window (#20).
+- On a phone, the 3D background's symbol is dimmer behind the hero's headline, which it competed with; the desktop does not change (#24).
+- On a phone, the 3D background's symbol is sharp: it is drawn at the screen's real density, up to 3x, instead of a 2x canvas the browser stretched, and its particles have a crisper edge, with their brightness lowered to match; the desktop does not change (#21).
+- On a phone, the 3D background no longer stalls the page after a fast scroll: its canvas follows the large viewport and is resized only when its size really changes, not when the address bar shows or hides, the page's height is kept instead of read on every frame, and a phone draws without MSAA at 30 frames per second, with the easing computed from time so the symbol keeps its pace; the desktop does not change (#25).
+
+### Fixed
+
+- On a desktop, the 3D background no longer stalls the page: a window being resized rebuilt its 2x drawing buffer on every frame, in stalls of 50 to 130 ms, and it is now rebuilt once the resize has settled; the symbol is built and the background starts once the page has loaded and the browser is idle, with its shaders compiled before the first frame, which cut the longest task at a first load from about 500 ms to under 100 ms; and no screen draws it with MSAA, which cost the GPU and changed nothing in the particles' soft edges (#22).
 
 ## [0.3.1] - 2026-11-22
 
@@ -47,7 +58,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The workflow *Quality* also type-checks, tests and builds the website and its infrastructure (#8).
 - The repository adopts `memorysmithapp-template` v0.5.1: `AGENTS.md`, `README.md` and `package.json` name `memorysmithapp-site`; `docs/PRD.md` and `docs/ARCHITECTURE.md` keep their skeletons and the description of the parts kept; the version restarts at `0.1.0` and the changelog names this repository (#2).
 
-[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/memorysmithapp/memorysmithapp-site/compare/v0.1.0...v0.2.0
